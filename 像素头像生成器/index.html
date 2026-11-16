@@ -1,0 +1,2722 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f0e6">
+<meta name="color-scheme" content="light">
+<title>像素头像工坊</title>
+<style>
+  :root {
+    --paper: #f4f0e6;
+    --surface: #fffdf8;
+    --surface-2: #f8f4ea;
+    --ink: #211c2b;
+    --ink-soft: #40394c;
+    --muted: #736d7c;
+    --line: #d8d0bf;
+    --line-soft: #e8e2d5;
+    --accent: #ff6b5e;
+    --accent-deep: #e74f43;
+    --accent-soft: #ffe1da;
+    --mint: #dceee2;
+    --lilac: #e8e0ff;
+    --yellow: #ffe7a3;
+    --green: #2f9b68;
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --shadow: 0 7px 0 rgba(33, 28, 43, 0.1);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(rgba(33, 28, 43, 0.075) 1px, transparent 1px),
+      radial-gradient(circle at 12% 4%, rgba(255, 107, 94, 0.12), transparent 30%),
+      radial-gradient(circle at 92% 14%, rgba(232, 224, 255, 0.7), transparent 28%);
+    background-size: 18px 18px, 100% 100%, 100% 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    color: inherit;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--accent-deep);
+    outline-offset: 3px;
+  }
+
+  [hidden] { display: none !important; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .page {
+    width: min(100%, 1024px);
+    margin: 0 auto;
+    padding: 18px 16px calc(34px + env(safe-area-inset-bottom));
+  }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    white-space: nowrap;
+  }
+
+  .brand-mark {
+    display: grid;
+    grid-template-columns: repeat(2, 11px);
+    grid-template-rows: repeat(2, 11px);
+    gap: 2px;
+    flex: 0 0 auto;
+    transform: rotate(-4deg);
+  }
+
+  .brand-mark span {
+    display: block;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    background: var(--accent);
+  }
+
+  .brand-mark span:nth-child(2) { background: var(--yellow); }
+  .brand-mark span:nth-child(3) { background: var(--lilac); }
+  .brand-mark span:nth-child(4) { background: var(--mint); }
+
+  .offline-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 5px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 253, 248, 0.72);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .offline-pill::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(47, 155, 104, 0.12);
+  }
+
+  .hero {
+    position: relative;
+    margin-bottom: 23px;
+  }
+
+  .kicker {
+    margin: 0 0 7px;
+    color: var(--accent-deep);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+  }
+
+  h1 {
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(2.45rem, 11.5vw, 4.8rem);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  h1 .title-pop {
+    position: relative;
+    display: inline-block;
+    color: var(--accent-deep);
+  }
+
+  h1 .title-pop::after {
+    content: "";
+    position: absolute;
+    right: 2%;
+    bottom: 0.01em;
+    left: 2%;
+    height: 0.11em;
+    border-radius: 999px;
+    background: var(--yellow);
+    z-index: -1;
+    transform: rotate(-1.5deg);
+  }
+
+  .lead {
+    max-width: 520px;
+    margin: 13px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .workspace {
+    display: grid;
+    gap: 15px;
+  }
+
+  .card {
+    min-width: 0;
+    padding: 16px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 13px;
+  }
+
+  .card-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .card-head h2::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    background: var(--accent);
+    transform: rotate(8deg);
+  }
+
+  .seed-label {
+    overflow: hidden;
+    max-width: 48%;
+    padding: 4px 8px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hint {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 15px;
+    border: 1.5px dashed rgba(33, 28, 43, 0.26);
+    border-radius: 19px;
+    background:
+      radial-gradient(circle at 12% 16%, rgba(255, 255, 255, 0.9) 0 3px, transparent 4px),
+      radial-gradient(circle at 88% 82%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+      linear-gradient(135deg, var(--mint) 0%, #fbf6e8 48%, var(--lilac) 100%);
+    overflow: hidden;
+  }
+
+  .stage::before {
+    content: "";
+    position: absolute;
+    top: -36px;
+    right: -26px;
+    width: 110px;
+    height: 110px;
+    border: 1.5px solid rgba(33, 28, 43, 0.13);
+    border-radius: 50%;
+  }
+
+  .stage::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    left: -22px;
+    width: 88px;
+    height: 88px;
+    border: 1.5px solid rgba(33, 28, 43, 0.11);
+    border-radius: 50%;
+  }
+
+  .canvas-shell {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 360px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    background-color: #fffdf8;
+    background-image:
+      conic-gradient(#f2eee4 25%, #fffdf8 0 50%, #f2eee4 0 75%, #fffdf8 0);
+    background-size: 24px 24px;
+    box-shadow: 4px 4px 0 rgba(33, 28, 43, 0.18);
+    isolation: isolate;
+  }
+
+  #avatarCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #avatarCanvas[data-active-tool="eraser"] { cursor: cell; }
+  #avatarCanvas[data-active-tool="picker"] { cursor: copy; }
+
+  .canvas-empty {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-content: center;
+    gap: 3px;
+    padding: 20px;
+    background: rgba(255, 253, 248, 0.84);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .canvas-empty strong {
+    display: block;
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .stage-badge {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2;
+    padding: 3px 7px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    background: var(--yellow);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    transform: rotate(-3deg);
+  }
+
+  .primary-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 9px;
+    margin-top: 15px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 51px;
+    padding: 11px 14px;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 850;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform 90ms ease, box-shadow 90ms ease, background-color 120ms ease;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .btn:active:not(:disabled) {
+    box-shadow: 1px 1px 0 var(--ink);
+    transform: translate(2px, 2px);
+  }
+
+  .btn:disabled {
+    border-color: var(--line);
+    background: var(--surface-2);
+    color: #a09a9f;
+    box-shadow: 2px 2px 0 var(--line-soft);
+    cursor: not-allowed;
+  }
+
+  .btn .btn-icon {
+    font-family: var(--mono);
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--surface);
+    box-shadow: 3px 3px 0 var(--accent);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    box-shadow: 1px 1px 0 var(--accent);
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .preview-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 42px;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .preview-meta > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .text-btn {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .text-btn:active:not(:disabled) { background: var(--surface-2); }
+  .text-btn:disabled { color: #b4aeb6; cursor: not-allowed; }
+
+  .tool-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 47px;
+    padding: 8px 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+
+  .tool-btn .tool-icon {
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .tool-btn[aria-pressed="true"] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--surface);
+  }
+
+  .palette-block {
+    margin-top: 16px;
+    padding-top: 15px;
+    border-top: 1.5px dashed var(--line);
+  }
+
+  .label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+
+  .label-row h3,
+  .switch-copy strong {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: -0.01em;
+  }
+
+  .current-color {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .current-chip {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--ink);
+    border-radius: 5px;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+  }
+
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 7px;
+  }
+
+  .swatch {
+    position: relative;
+    min-height: 44px;
+    padding: 0;
+    border: 1.5px solid rgba(33, 28, 43, 0.35);
+    border-radius: 11px;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+    cursor: pointer;
+    transition: transform 100ms ease, box-shadow 100ms ease;
+  }
+
+  .swatch:active { transform: scale(0.94); }
+
+  .swatch[aria-pressed="true"] {
+    border-color: var(--ink);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 0 4px var(--ink),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.28);
+  }
+
+  .swatch[aria-pressed="true"]::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: var(--check, #fffdf8);
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+    transform: translate(-50%, -52%);
+  }
+
+  .color-custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 46px;
+    margin-top: 9px;
+    padding: 5px 7px 5px 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .color-custom input {
+    width: 48px;
+    height: 40px;
+    padding: 3px;
+    border: 1.5px solid var(--ink);
+    border-radius: 9px;
+    background: var(--surface);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .color-custom input::-webkit-color-swatch-wrapper { padding: 0; }
+  .color-custom input::-webkit-color-swatch {
+    border: 0;
+    border-radius: 6px;
+  }
+  .color-custom input::-moz-color-swatch {
+    border: 0;
+    border-radius: 6px;
+  }
+
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 57px;
+    padding: 9px 0;
+    border-top: 1.5px dashed var(--line);
+  }
+
+  .tool-group + .palette-block + .switch-row { margin-top: 2px; }
+
+  .switch-copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .switch-copy span {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .switch {
+    position: relative;
+    flex: 0 0 auto;
+    width: 54px;
+    height: 32px;
+    padding: 0;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: background-color 140ms ease;
+  }
+
+  .switch::before {
+    content: "";
+    position: absolute;
+    inset: -9px;
+    border-radius: 999px;
+  }
+
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 21px;
+    height: 21px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: var(--surface);
+    transition: transform 140ms ease;
+  }
+
+  .switch[aria-checked="true"] { background: var(--mint); }
+  .switch[aria-checked="true"]::after { transform: translateX(21px); }
+
+  .secondary-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+    gap: 8px;
+    margin-top: 11px;
+    padding-top: 14px;
+    border-top: 1.5px dashed var(--line);
+  }
+
+  .small-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 46px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+
+  .small-btn:active { background: var(--surface-2); }
+
+  .small-btn.is-armed {
+    border-color: var(--accent-deep);
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+  }
+
+  .wide-card {
+    margin-top: 15px;
+  }
+
+  .export-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .export-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 72px;
+    padding: 9px 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 13px;
+    background: var(--surface-2);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 100ms ease;
+  }
+
+  .export-btn:active {
+    background: var(--yellow);
+    border-color: var(--ink);
+    transform: translateY(1px);
+  }
+
+  .export-btn .export-icon {
+    font-family: var(--mono);
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .export-btn strong {
+    font-size: 13px;
+    font-weight: 850;
+    line-height: 1.25;
+  }
+
+  .export-btn small {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  .import-details {
+    margin-top: 13px;
+    border-top: 1.5px dashed var(--line);
+  }
+
+  .import-details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 49px;
+    padding: 10px 2px 4px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 800;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .import-details summary::-webkit-details-marker { display: none; }
+
+  .import-details summary::after {
+    content: "+";
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .import-details[open] summary::after {
+    content: "−";
+    border-color: var(--ink);
+    background: var(--yellow);
+  }
+
+  .import-body {
+    padding: 4px 0 2px;
+  }
+
+  .import-body p {
+    margin: 0 0 9px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .import-text {
+    display: block;
+    width: 100%;
+    min-height: 112px;
+    padding: 11px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .import-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  #fileInput { display: none; }
+
+  .gallery-note {
+    margin: -2px 0 11px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .gallery-count {
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .gallery-item {
+    position: relative;
+    min-width: 0;
+    padding: 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 13px;
+    background: var(--surface-2);
+  }
+
+  .gallery-load {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .gallery-canvas-wrap {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1.5px solid var(--ink);
+    border-radius: 9px;
+    background-color: #fffdf8;
+    background-image:
+      conic-gradient(#f2eee4 25%, #fffdf8 0 50%, #f2eee4 0 75%, #fffdf8 0);
+    background-size: 16px 16px;
+  }
+
+  .gallery-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  .gallery-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 5px 2px 1px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .gallery-meta span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gallery-remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1.5px solid var(--ink);
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.9);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+  }
+
+  .gallery-remove:active { background: var(--accent-soft); }
+
+  .empty-state {
+    display: grid;
+    place-items: center;
+    gap: 5px;
+    min-height: 128px;
+    padding: 20px;
+    border: 1.5px dashed var(--line);
+    border-radius: 14px;
+    background: var(--surface-2);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .empty-state .empty-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 3px;
+    border: 1.5px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 900;
+    transform: rotate(-3deg);
+  }
+
+  .empty-state strong {
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+
+  .empty-state span {
+    font-size: 10px;
+  }
+
+  .site-footer {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 18px;
+    padding: 0 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .site-footer::before {
+    content: "✦";
+    color: var(--accent-deep);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .toast {
+    position: fixed;
+    right: 16px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    left: 16px;
+    z-index: 30;
+    width: fit-content;
+    max-width: min(92vw, 480px);
+    margin: 0 auto;
+    padding: 11px 15px;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--surface);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 3px 3px 0 rgba(255, 107, 94, 0.65);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes canvas-pop {
+    0% { transform: scale(0.985) rotate(-0.4deg); }
+    55% { transform: scale(1.012) rotate(0.3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .canvas-shell.pop { animation: canvas-pop 280ms ease; }
+
+  @media (min-width: 370px) {
+    .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 720px) {
+    .page { padding: 28px 28px calc(42px + env(safe-area-inset-bottom)); }
+    .site-header { margin-bottom: 38px; }
+    .hero { margin-bottom: 28px; }
+    .lead { font-size: 16px; }
+    .workspace {
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+      align-items: start;
+      gap: 20px;
+    }
+    .card { padding: 20px; }
+    .gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .wide-card { margin-top: 20px; }
+    .primary-actions { gap: 11px; }
+    .export-grid { gap: 11px; }
+  }
+
+  @media (min-width: 960px) {
+    .page { padding-top: 34px; }
+    .stage { padding: 20px; }
+    .canvas-shell { width: min(100%, 392px); }
+  }
+
+  @media (max-width: 359px) {
+    .card { padding: 13px; }
+    .offline-pill { font-size: 10px; padding-inline: 8px; }
+    .btn { font-size: 14px; padding-inline: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <div class="brand" aria-label="像素头像工坊">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+      <span>像素头像实验室</span>
+    </div>
+    <div class="offline-pill">纯本地 · 断网可用</div>
+  </header>
+
+  <section class="hero" aria-labelledby="pageTitle">
+    <p class="kicker">16 × 16 · 随手造脸</p>
+    <h1 id="pageTitle">像素头像<span class="title-pop">工坊</span></h1>
+    <p class="lead">掷一颗灵感的骰子，再亲手补上几笔。<br>捏一张只属于你的迷你小脸。</p>
+  </section>
+
+  <main>
+    <div class="workspace">
+      <section class="card preview-card" id="previewCard" aria-labelledby="previewTitle">
+        <div class="card-head">
+          <h2 id="previewTitle">预览</h2>
+          <span class="seed-label" id="seedLabel" title="设计种子">#------</span>
+        </div>
+
+        <div class="stage">
+          <div class="canvas-shell" id="canvasShell">
+            <canvas id="avatarCanvas" width="512" height="512" aria-label="像素头像画布">你的浏览器不支持 Canvas，请更换浏览器。</canvas>
+            <div class="canvas-empty" id="canvasEmpty" hidden>
+              <strong>画布空空的</strong>
+              <span>点「随机生成」或直接画几笔</span>
+            </div>
+          </div>
+          <span class="stage-badge" aria-hidden="true">16 × 16</span>
+        </div>
+
+        <div class="primary-actions">
+          <button type="button" class="btn btn-primary" id="generateBtn">
+            <span class="btn-icon" aria-hidden="true">✦</span>
+            随机生成
+          </button>
+          <button type="button" class="btn" id="recolorBtn">
+            <span class="btn-icon" aria-hidden="true">◐</span>
+            换配色
+          </button>
+        </div>
+
+        <div class="preview-meta">
+          <span id="statusText" aria-live="polite">正在捏第一张脸…</span>
+          <button type="button" class="text-btn" id="undoBtn" disabled>↶ 撤销</button>
+        </div>
+      </section>
+
+      <section class="card editor-card" aria-labelledby="editorTitle">
+        <div class="card-head">
+          <h2 id="editorTitle">画笔</h2>
+          <span class="hint">在画布上点按 / 拖动</span>
+        </div>
+
+        <div class="tool-group" role="group" aria-label="绘制工具">
+          <button type="button" class="tool-btn" data-tool="brush" aria-pressed="true">
+            <span class="tool-icon" aria-hidden="true">✎</span>画笔
+          </button>
+          <button type="button" class="tool-btn" data-tool="eraser" aria-pressed="false">
+            <span class="tool-icon" aria-hidden="true">▢</span>橡皮
+          </button>
+          <button type="button" class="tool-btn" data-tool="picker" aria-pressed="false">
+            <span class="tool-icon" aria-hidden="true">⌖</span>吸管
+          </button>
+        </div>
+
+        <div class="palette-block">
+          <div class="label-row">
+            <h3>颜色</h3>
+            <span class="current-color">
+              <span class="current-chip" id="currentChip" aria-hidden="true"></span>
+              <span id="currentHex">#FF6B5E</span>
+            </span>
+          </div>
+          <div class="palette" id="palette" role="group" aria-label="调色板"></div>
+          <label class="color-custom">
+            <span>调一个自定义颜色</span>
+            <input type="color" id="customColor" value="#ff6b5e" aria-label="自定义画笔颜色">
+          </label>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-copy">
+            <strong>对称绘制</strong>
+            <span>左右镜像同步落笔</span>
+          </div>
+          <button type="button" class="switch" id="mirrorBtn" role="switch" aria-checked="true" aria-label="对称绘制"></button>
+        </div>
+
+        <div class="switch-row">
+          <div class="switch-copy">
+            <strong>显示网格</strong>
+            <span>看清每一颗像素</span>
+          </div>
+          <button type="button" class="switch" id="gridBtn" role="switch" aria-checked="true" aria-label="显示网格"></button>
+        </div>
+
+        <div class="secondary-actions">
+          <button type="button" class="small-btn" id="snapshotBtn">＋ 收进本次画廊</button>
+          <button type="button" class="small-btn" id="clearBtn">清空画布</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card wide-card" aria-labelledby="exportTitle">
+      <div class="card-head">
+        <h2 id="exportTitle">带走它</h2>
+        <span class="hint">文件只存在你的设备上</span>
+      </div>
+      <div class="export-grid">
+        <button type="button" class="export-btn" id="pngBtn">
+          <span class="export-icon" aria-hidden="true">↓</span>
+          <strong>下载 PNG</strong>
+          <small>透明背景</small>
+        </button>
+        <button type="button" class="export-btn" id="jsonBtn">
+          <span class="export-icon" aria-hidden="true">{ }</span>
+          <strong>导出 JSON</strong>
+          <small>可再次导入</small>
+        </button>
+        <button type="button" class="export-btn" id="copyBtn">
+          <span class="export-icon" aria-hidden="true">⧉</span>
+          <strong>复制文本</strong>
+          <small>粘贴即分享</small>
+        </button>
+      </div>
+
+      <details class="import-details" id="importDetails">
+        <summary>导入一份设计</summary>
+        <div class="import-body">
+          <p>把之前复制的 JSON 文本粘在下面，或者选择一个 JSON 文件。</p>
+          <textarea class="import-text" id="importText" placeholder='{"app":"pixel-avatar-studio","size":16,"pixels":[...]}' spellcheck="false" aria-label="粘贴头像 JSON 文本"></textarea>
+          <div class="import-actions">
+            <button type="button" class="small-btn" id="importTextBtn">导入文本</button>
+            <button type="button" class="small-btn" id="importFileBtn">选择 JSON 文件</button>
+          </div>
+          <input type="file" id="fileInput" accept=".json,application/json">
+        </div>
+      </details>
+    </section>
+
+    <section class="card wide-card" aria-labelledby="galleryTitle">
+      <div class="card-head">
+        <h2 id="galleryTitle">本次画廊</h2>
+        <span class="gallery-count" id="galleryCount">0 / 12</span>
+      </div>
+      <p class="gallery-note">只保存在当前页面，刷新后会清空。</p>
+      <div class="gallery-grid" id="gallery" hidden></div>
+      <div class="empty-state" id="galleryEmpty">
+        <span class="empty-icon" aria-hidden="true">＋</span>
+        <strong>还没有收藏</strong>
+        <span>画好一张后，点「收进本次画廊」</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    所有设计只保存在当前页面内存中。需要留住它时，记得下载 PNG 或导出 JSON。
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript>
+  <div style="position:fixed;inset:0;z-index:99;display:grid;place-content:center;padding:24px;background:#f4f0e6;color:#211c2b;font:700 16px sans-serif;text-align:center;">请启用 JavaScript 后再打开像素头像工坊。</div>
+</noscript>
+
+<script>
+(function () {
+  "use strict";
+
+  var SIZE = 16;
+  var CELL = 32;
+  var PREVIEW_SIZE = SIZE * CELL;
+  var EXPORT_SCALE = 64;
+  var MAX_HISTORY = 30;
+  var MAX_GALLERY = 12;
+  var HEX_RE = /^#[0-9a-f]{6}$/;
+
+  var SKINS = [
+    { base: "#f8d9bd", shade: "#e5b797", light: "#ffe9d6" },
+    { base: "#efc49c", shade: "#d5a074", light: "#f9d9b8" },
+    { base: "#d99b6b", shade: "#b77a4d", light: "#e9b88b" },
+    { base: "#bc7a50", shade: "#985932", light: "#d29468" },
+    { base: "#945c3c", shade: "#74452c", light: "#ae7552" },
+    { base: "#744a34", shade: "#573426", light: "#8e6047" },
+    { base: "#f2d3b2", shade: "#d8ad88", light: "#ffe2c7" },
+    { base: "#c88b62", shade: "#a76946", light: "#dfa77c" },
+    { base: "#a86b4c", shade: "#845036", light: "#c38a68" }
+  ];
+
+  var HAIRS = [
+    { base: "#2b2433", shade: "#17121f", light: "#493d58" },
+    { base: "#3e2b20", shade: "#291a12", light: "#5f4332" },
+    { base: "#7a4a25", shade: "#563018", light: "#a26532" },
+    { base: "#d8a341", shade: "#ae7b25", light: "#f2c96d" },
+    { base: "#d7d2c4", shade: "#aaa696", light: "#f2efe4" },
+    { base: "#c94f49", shade: "#9b3530", light: "#e8776e" },
+    { base: "#4d70a9", shade: "#34517f", light: "#718fc4" },
+    { base: "#7c4a9f", shade: "#593172", light: "#9d70c0" },
+    { base: "#2e8b72", shade: "#1d6955", light: "#52ac92" },
+    { base: "#d46d9d", shade: "#a94a76", light: "#ef93bc" },
+    { base: "#f0e1cc", shade: "#cfbca1", light: "#fff7eb" }
+  ];
+
+  var OUTFITS = [
+    { base: "#e85d5d", shade: "#b94044", light: "#ff8581" },
+    { base: "#f0a33c", shade: "#c67c1f", light: "#ffc36d" },
+    { base: "#f2cf4a", shade: "#c8a22b", light: "#ffe980" },
+    { base: "#65b96b", shade: "#448f4d", light: "#8bdd8f" },
+    { base: "#3bb3b8", shade: "#26858b", light: "#6bd9dc" },
+    { base: "#4f7fdb", shade: "#345dab", light: "#7ba5f4" },
+    { base: "#846bd1", shade: "#614b9f", light: "#ab95f0" },
+    { base: "#d96aa8", shade: "#a94b80", light: "#f294c7" },
+    { base: "#35424c", shade: "#222c34", light: "#546572" },
+    { base: "#e8e3d6", shade: "#c4bdad", light: "#fffdf5" }
+  ];
+
+  var ACCENTS = [
+    "#ffd166",
+    "#ff8fa3",
+    "#5fd0c0",
+    "#9b8cff",
+    "#fffdf7",
+    "#2b2d42",
+    "#ffb45e",
+    "#6ee7b7",
+    "#e6a4ff",
+    "#8fc7ff"
+  ];
+
+  var HAIR_STYLES = ["crop", "sidepart", "spiky", "bob", "curly", "mohawk", "beanie", "long"];
+  var ACCESSORIES = ["none", "none", "none", "headphones", "shades", "mask", "earrings"];
+  var EYE_STYLES = ["wide", "wide", "dot", "wink"];
+  var MOUTH_STYLES = ["line", "line", "small", "small"];
+  var OUTFIT_STYLES = ["tee", "stripe", "hoodie", "overalls", "scarf", "jacket"];
+
+  var el = {};
+  var ctx = null;
+  var toastTimer = null;
+  var clearTimer = null;
+
+  var state = {
+    pixels: new Array(SIZE * SIZE).fill(null),
+    seed: "PIXEL1",
+    colorVariant: 0,
+    palette: null,
+    style: null,
+    swatches: [],
+    selectedColor: "#ff6b5e",
+    tool: "brush",
+    mirror: true,
+    showGrid: true,
+    history: [],
+    snapshots: [],
+    snapshotSeq: 1,
+    drawing: false,
+    strokeStart: null,
+    strokeChanged: false,
+    strokeStatusSet: false,
+    lastCell: null,
+    status: ""
+  };
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function normalizeHex(value) {
+    if (typeof value !== "string") return null;
+    var hex = value.trim().toLowerCase();
+    if (hex.charAt(0) !== "#") hex = "#" + hex;
+    return HEX_RE.test(hex) ? hex : null;
+  }
+
+  function hexToRgb(hex) {
+    var clean = normalizeHex(hex) || "#000000";
+    return {
+      r: parseInt(clean.slice(1, 3), 16),
+      g: parseInt(clean.slice(3, 5), 16),
+      b: parseInt(clean.slice(5, 7), 16)
+    };
+  }
+
+  function rgbToHex(r, g, b) {
+    var parts = [r, g, b].map(function (part) {
+      return clamp(Math.round(part), 0, 255).toString(16).padStart(2, "0");
+    });
+    return "#" + parts.join("");
+  }
+
+  function mixColor(a, b, amount) {
+    var aa = hexToRgb(a);
+    var bb = hexToRgb(b);
+    var t = clamp(amount, 0, 1);
+    return rgbToHex(
+      aa.r + (bb.r - aa.r) * t,
+      aa.g + (bb.g - aa.g) * t,
+      aa.b + (bb.b - aa.b) * t
+    );
+  }
+
+  function isDark(hex) {
+    var rgb = hexToRgb(hex);
+    return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000 < 145;
+  }
+
+  function hashString(text) {
+    var hash = 2166136261 >>> 0;
+    for (var i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function mulberry32(seedValue) {
+    var a = seedValue >>> 0;
+    return function () {
+      a |= 0;
+      a = (a + 0x6d2b79f5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function rngFrom(seed, salt) {
+    return mulberry32(hashString(String(seed) + "::" + salt));
+  }
+
+  function pick(rng, list) {
+    return list[Math.floor(rng() * list.length) % list.length];
+  }
+
+  function makeSeed() {
+    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    var out = "";
+    for (var i = 0; i < 6; i += 1) {
+      out += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return out;
+  }
+
+  function sanitizeSeed(value) {
+    var seed = String(value == null ? "IMPORT" : value)
+      .toUpperCase()
+      .replace(/[^A-Z0-9-]/g, "")
+      .slice(0, 12);
+    return seed || "IMPORT";
+  }
+
+  function clonePalette(palette) {
+    if (!palette) return null;
+    return {
+      skin: { base: palette.skin.base, shade: palette.skin.shade, light: palette.skin.light },
+      hair: { base: palette.hair.base, shade: palette.hair.shade, light: palette.hair.light },
+      outfit: { base: palette.outfit.base, shade: palette.outfit.shade, light: palette.outfit.light },
+      accent: palette.accent,
+      accentLight: palette.accentLight,
+      accentShade: palette.accentShade,
+      brow: palette.brow,
+      mouth: palette.mouth,
+      blush: palette.blush,
+      eye: palette.eye,
+      white: palette.white,
+      ink: palette.ink
+    };
+  }
+
+  function buildPalette(seed, variant) {
+    var rng = rngFrom(seed + "|" + variant, "palette-v2");
+    var skin = pick(rng, SKINS);
+    var hair = pick(rng, HAIRS);
+    var outfit = pick(rng, OUTFITS);
+    var accent = pick(rng, ACCENTS);
+
+    return {
+      skin: { base: skin.base, shade: skin.shade, light: skin.light },
+      hair: { base: hair.base, shade: hair.shade, light: hair.light },
+      outfit: { base: outfit.base, shade: outfit.shade, light: outfit.light },
+      accent: accent,
+      accentLight: mixColor(accent, "#ffffff", 0.34),
+      accentShade: mixColor(accent, "#241f2d", 0.28),
+      brow: mixColor(hair.shade, "#241f2d", 0.46),
+      mouth: mixColor("#241f2d", "#c05662", 0.25),
+      blush: mixColor(skin.base, "#ef7f86", 0.46),
+      eye: "#241f2d",
+      white: "#fffdf7",
+      ink: "#241f2d"
+    };
+  }
+
+  function paletteKey(palette) {
+    if (!palette) return "";
+    return [
+      palette.skin.base,
+      palette.hair.base,
+      palette.outfit.base,
+      palette.accent
+    ].join("|");
+  }
+
+  function nextPalette(seed, currentVariant, oldPalette) {
+    var variant = currentVariant;
+    var next = buildPalette(seed, variant + 1);
+    var attempts = 0;
+    while (paletteKey(next) === paletteKey(oldPalette) && attempts < 6) {
+      variant += 1;
+      next = buildPalette(seed, variant + 1);
+      attempts += 1;
+    }
+    return { palette: next, variant: variant + 1 };
+  }
+
+  function buildStyle(seed) {
+    var rng = rngFrom(seed, "shape-v2");
+    return {
+      hair: pick(rng, HAIR_STYLES),
+      accessory: pick(rng, ACCESSORIES),
+      eyes: pick(rng, EYE_STYLES),
+      mouth: pick(rng, MOUTH_STYLES),
+      outfit: pick(rng, OUTFIT_STYLES),
+      blush: rng() < 0.58
+    };
+  }
+
+  function putPixel(pixels, x, y, color) {
+    if (x < 0 || y < 0 || x >= SIZE || y >= SIZE || !color) return;
+    pixels[y * SIZE + x] = color;
+  }
+
+  function fillPixels(pixels, x0, y0, x1, y1, color) {
+    if (!color) return;
+    for (var y = y0; y <= y1; y += 1) {
+      for (var x = x0; x <= x1; x += 1) {
+        putPixel(pixels, x, y, color);
+      }
+    }
+  }
+
+  function getPixel(pixels, x, y) {
+    if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return null;
+    return pixels[y * SIZE + x];
+  }
+
+  function isSkinAt(pixels, x, y, palette) {
+    var color = getPixel(pixels, x, y);
+    return (
+      color === palette.skin.base ||
+      color === palette.skin.shade ||
+      color === palette.skin.light
+    );
+  }
+
+  function drawBody(pixels, palette) {
+    var o = palette.outfit;
+    fillPixels(pixels, 4, 12, 11, 12, o.base);
+    fillPixels(pixels, 3, 13, 12, 13, o.base);
+    fillPixels(pixels, 2, 14, 13, 15, o.base);
+
+    fillPixels(pixels, 2, 14, 2, 15, o.shade);
+    fillPixels(pixels, 13, 14, 13, 15, o.shade);
+    putPixel(pixels, 3, 15, o.shade);
+    putPixel(pixels, 12, 15, o.shade);
+    putPixel(pixels, 4, 12, o.light);
+    putPixel(pixels, 11, 12, o.light);
+
+    fillPixels(pixels, 7, 10, 8, 11, palette.skin.base);
+    putPixel(pixels, 7, 10, palette.skin.shade);
+    putPixel(pixels, 8, 10, palette.skin.shade);
+  }
+
+  function drawHead(pixels, palette) {
+    var skin = palette.skin;
+
+    putPixel(pixels, 3, 6, skin.base);
+    putPixel(pixels, 3, 7, skin.base);
+    putPixel(pixels, 12, 6, skin.base);
+    putPixel(pixels, 12, 7, skin.base);
+    putPixel(pixels, 3, 7, skin.shade);
+    putPixel(pixels, 12, 7, skin.shade);
+
+    fillPixels(pixels, 5, 3, 10, 3, skin.base);
+    fillPixels(pixels, 4, 4, 11, 4, skin.base);
+    fillPixels(pixels, 4, 5, 11, 8, skin.base);
+    fillPixels(pixels, 5, 9, 10, 9, skin.base);
+
+    putPixel(pixels, 4, 8, skin.shade);
+    putPixel(pixels, 11, 8, skin.shade);
+    putPixel(pixels, 5, 9, skin.shade);
+    putPixel(pixels, 10, 9, skin.shade);
+  }
+
+  function drawHair(pixels, style, palette) {
+    var hair = palette.hair;
+    var hb = hair.base;
+    var hs = hair.shade;
+    var hl = hair.light;
+
+    if (style === "crop") {
+      fillPixels(pixels, 5, 2, 10, 2, hb);
+      fillPixels(pixels, 4, 3, 11, 3, hb);
+      fillPixels(pixels, 4, 4, 11, 4, hb);
+      putPixel(pixels, 4, 5, hb);
+      putPixel(pixels, 11, 5, hb);
+      putPixel(pixels, 5, 4, hs);
+      putPixel(pixels, 10, 4, hs);
+      putPixel(pixels, 6, 2, hl);
+      putPixel(pixels, 9, 2, hl);
+      putPixel(pixels, 4, 3, hs);
+      putPixel(pixels, 11, 3, hs);
+      return;
+    }
+
+    if (style === "sidepart") {
+      fillPixels(pixels, 5, 2, 10, 2, hb);
+      fillPixels(pixels, 4, 3, 11, 3, hb);
+      fillPixels(pixels, 4, 4, 8, 4, hb);
+      fillPixels(pixels, 11, 4, 11, 4, hb);
+      fillPixels(pixels, 9, 4, 9, 4, hs);
+      putPixel(pixels, 4, 5, hb);
+      putPixel(pixels, 11, 5, hb);
+      putPixel(pixels, 5, 2, hl);
+      putPixel(pixels, 6, 3, hl);
+      putPixel(pixels, 4, 3, hs);
+      putPixel(pixels, 11, 3, hs);
+      return;
+    }
+
+    if (style === "spiky") {
+      fillPixels(pixels, 5, 2, 10, 2, hb);
+      fillPixels(pixels, 4, 3, 11, 3, hb);
+      fillPixels(pixels, 4, 4, 11, 4, hb);
+      putPixel(pixels, 4, 1, hb);
+      putPixel(pixels, 6, 1, hb);
+      putPixel(pixels, 9, 1, hb);
+      putPixel(pixels, 11, 1, hb);
+      putPixel(pixels, 4, 5, hb);
+      putPixel(pixels, 5, 5, hb);
+      putPixel(pixels, 10, 5, hb);
+      putPixel(pixels, 11, 5, hb);
+      putPixel(pixels, 6, 2, hl);
+      putPixel(pixels, 9, 2, hl);
+      putPixel(pixels, 4, 3, hs);
+      putPixel(pixels, 11, 3, hs);
+      return;
+    }
+
+    if (style === "bob") {
+      fillPixels(pixels, 5, 2, 10, 2, hb);
+      fillPixels(pixels, 4, 3, 11, 3, hb);
+      fillPixels(pixels, 3, 4, 12, 4, hb);
+      fillPixels(pixels, 3, 5, 3, 9, hb);
+      fillPixels(pixels, 12, 5, 12, 9, hb);
+      fillPixels(pixels, 3, 10, 4, 10, hb);
+      fillPixels(pixels, 11, 10, 12, 10, hb);
+      putPixel(pixels, 3, 7, hs);
+      putPixel(pixels, 12, 7, hs);
+      putPixel(pixels, 3, 9, hs);
+      putPixel(pixels, 12, 9, hs);
+      putPixel(pixels, 6, 2, hl);
+      putPixel(pixels, 9, 2, hl);
+      putPixel(pixels, 4, 3, hs);
+      putPixel(pixels, 11, 3, hs);
+      return;
+    }
+
+    if (style === "curly") {
+      fillPixels(pixels, 5, 1, 10, 1, hb);
+      fillPixels(pixels, 4, 2, 11, 2, hb);
+      fillPixels(pixels, 3, 3, 12, 4, hb);
+      fillPixels(pixels, 3, 5, 3, 7, hb);
+      fillPixels(pixels, 12, 5, 12, 7, hb);
+      fillPixels(pixels, 4, 4, 11, 4, hb);
+      putPixel(pixels, 5, 1, hl);
+      putPixel(pixels, 9, 1, hl);
+      putPixel(pixels, 4, 2, hl);
+      putPixel(pixels, 11, 2, hs);
+      putPixel(pixels, 3, 4, hs);
+      putPixel(pixels, 12, 4, hs);
+      putPixel(pixels, 3, 6, hs);
+      putPixel(pixels, 12, 6, hs);
+      return;
+    }
+
+    if (style === "mohawk") {
+      fillPixels(pixels, 4, 3, 5, 4, hs);
+      fillPixels(pixels, 10, 3, 11, 4, hs);
+      fillPixels(pixels, 6, 3, 9, 4, hs);
+      fillPixels(pixels, 6, 1, 9, 2, hb);
+      fillPixels(pixels, 7, 1, 8, 1, hb);
+      putPixel(pixels, 6, 1, hl);
+      putPixel(pixels, 9, 1, hs);
+      putPixel(pixels, 5, 3, hb);
+      putPixel(pixels, 10, 3, hb);
+      putPixel(pixels, 4, 3, hs);
+      putPixel(pixels, 11, 3, hs);
+      return;
+    }
+
+    if (style === "beanie") {
+      fillPixels(pixels, 3, 4, 4, 6, hb);
+      fillPixels(pixels, 11, 4, 12, 6, hb);
+      fillPixels(pixels, 5, 1, 10, 1, palette.outfit.base);
+      fillPixels(pixels, 4, 2, 11, 2, palette.outfit.base);
+      fillPixels(pixels, 3, 3, 12, 3, palette.accent);
+      putPixel(pixels, 5, 1, palette.outfit.light);
+      putPixel(pixels, 10, 1, palette.outfit.shade);
+      putPixel(pixels, 4, 2, palette.outfit.shade);
+      putPixel(pixels, 11, 2, palette.outfit.shade);
+      putPixel(pixels, 7, 3, palette.accentLight);
+      putPixel(pixels, 8, 3, palette.accentLight);
+      putPixel(pixels, 3, 4, hb);
+      putPixel(pixels, 12, 4, hb);
+      return;
+    }
+
+    // long
+    fillPixels(pixels, 5, 2, 10, 2, hb);
+    fillPixels(pixels, 4, 3, 11, 3, hb);
+    fillPixels(pixels, 3, 4, 12, 4, hb);
+    fillPixels(pixels, 3, 5, 3, 13, hb);
+    fillPixels(pixels, 12, 5, 12, 13, hb);
+    fillPixels(pixels, 4, 12, 4, 13, hb);
+    fillPixels(pixels, 11, 12, 11, 13, hb);
+    putPixel(pixels, 6, 2, hl);
+    putPixel(pixels, 9, 2, hl);
+    putPixel(pixels, 4, 3, hs);
+    putPixel(pixels, 11, 3, hs);
+    putPixel(pixels, 3, 7, hs);
+    putPixel(pixels, 12, 7, hs);
+    putPixel(pixels, 3, 11, hs);
+    putPixel(pixels, 12, 11, hs);
+    putPixel(pixels, 3, 13, hs);
+    putPixel(pixels, 12, 13, hs);
+  }
+
+  function drawFace(pixels, style, palette) {
+    var ink = palette.eye;
+
+    if (style.eyes === "wide") {
+      fillPixels(pixels, 5, 6, 6, 6, ink);
+      fillPixels(pixels, 9, 6, 10, 6, ink);
+    } else if (style.eyes === "dot") {
+      putPixel(pixels, 5, 6, ink);
+      putPixel(pixels, 10, 6, ink);
+    } else {
+      fillPixels(pixels, 5, 6, 6, 6, ink);
+      putPixel(pixels, 10, 6, ink);
+    }
+
+    if (style.blush) {
+      if (isSkinAt(pixels, 4, 7, palette)) putPixel(pixels, 4, 7, palette.blush);
+      if (isSkinAt(pixels, 11, 7, palette)) putPixel(pixels, 11, 7, palette.blush);
+    }
+
+    if (isSkinAt(pixels, 7, 7, palette)) putPixel(pixels, 7, 7, palette.skin.shade);
+
+    if (style.mouth === "line") {
+      fillPixels(pixels, 7, 8, 8, 8, palette.mouth);
+    } else {
+      putPixel(pixels, 7, 8, palette.mouth);
+    }
+  }
+
+  function drawOutfit(pixels, style, palette) {
+    var o = palette.outfit;
+    var accent = palette.accent;
+
+    if (style === "tee") {
+      putPixel(pixels, 6, 12, o.light);
+      putPixel(pixels, 9, 12, o.light);
+      putPixel(pixels, 7, 14, o.light);
+      putPixel(pixels, 8, 14, o.light);
+      return;
+    }
+
+    if (style === "stripe") {
+      fillPixels(pixels, 2, 14, 13, 14, accent);
+      putPixel(pixels, 6, 12, o.light);
+      putPixel(pixels, 9, 12, o.light);
+      return;
+    }
+
+    if (style === "hoodie") {
+      putPixel(pixels, 5, 12, o.light);
+      putPixel(pixels, 6, 12, o.light);
+      putPixel(pixels, 9, 12, o.light);
+      putPixel(pixels, 10, 12, o.light);
+      fillPixels(pixels, 6, 13, 6, 14, palette.accentLight);
+      fillPixels(pixels, 9, 13, 9, 14, palette.accentLight);
+      fillPixels(pixels, 6, 15, 9, 15, o.shade);
+      return;
+    }
+
+    if (style === "overalls") {
+      fillPixels(pixels, 5, 12, 5, 14, accent);
+      fillPixels(pixels, 10, 12, 10, 14, accent);
+      fillPixels(pixels, 6, 14, 9, 15, accent);
+      putPixel(pixels, 7, 14, palette.accentLight);
+      putPixel(pixels, 8, 14, palette.accentLight);
+      putPixel(pixels, 5, 14, palette.accentLight);
+      putPixel(pixels, 10, 14, palette.accentLight);
+      return;
+    }
+
+    if (style === "scarf") {
+      fillPixels(pixels, 4, 12, 11, 12, accent);
+      fillPixels(pixels, 4, 13, 5, 14, accent);
+      putPixel(pixels, 4, 13, palette.accentLight);
+      putPixel(pixels, 9, 14, o.light);
+      putPixel(pixels, 10, 14, o.light);
+      return;
+    }
+
+    // jacket
+    fillPixels(pixels, 4, 12, 5, 13, o.light);
+    fillPixels(pixels, 10, 12, 11, 13, o.light);
+    fillPixels(pixels, 7, 13, 8, 15, o.shade);
+    putPixel(pixels, 7, 13, palette.accentLight);
+    putPixel(pixels, 7, 14, palette.accentLight);
+    putPixel(pixels, 7, 15, palette.accentLight);
+  }
+
+  function drawAccessory(pixels, style, palette) {
+    var ink = palette.ink;
+    var accent = palette.accent;
+
+    if (style === "headphones") {
+      fillPixels(pixels, 5, 1, 10, 1, accent);
+      putPixel(pixels, 4, 2, accent);
+      putPixel(pixels, 11, 2, accent);
+      fillPixels(pixels, 2, 6, 3, 8, accent);
+      fillPixels(pixels, 12, 6, 13, 8, accent);
+      fillPixels(pixels, 3, 7, 3, 8, palette.accentShade);
+      fillPixels(pixels, 12, 7, 12, 8, palette.accentShade);
+      putPixel(pixels, 2, 6, palette.accentLight);
+      putPixel(pixels, 13, 6, palette.accentLight);
+      return;
+    }
+
+    if (style === "shades") {
+      fillPixels(pixels, 4, 6, 6, 6, palette.accentShade);
+      fillPixels(pixels, 9, 6, 11, 6, palette.accentShade);
+      fillPixels(pixels, 7, 6, 8, 6, ink);
+      putPixel(pixels, 5, 6, palette.accentLight);
+      putPixel(pixels, 10, 6, palette.accentLight);
+      putPixel(pixels, 3, 6, ink);
+      putPixel(pixels, 12, 6, ink);
+      return;
+    }
+
+    if (style === "mask") {
+      fillPixels(pixels, 4, 8, 11, 8, accent);
+      fillPixels(pixels, 5, 9, 10, 9, palette.accentShade);
+      fillPixels(pixels, 3, 8, 3, 8, palette.accentShade);
+      fillPixels(pixels, 12, 8, 12, 8, palette.accentShade);
+      putPixel(pixels, 7, 8, palette.accentLight);
+      putPixel(pixels, 8, 8, palette.accentLight);
+      return;
+    }
+
+    if (style === "earrings") {
+      putPixel(pixels, 3, 8, accent);
+      putPixel(pixels, 12, 8, accent);
+      putPixel(pixels, 3, 9, palette.accentShade);
+      putPixel(pixels, 12, 9, palette.accentShade);
+    }
+  }
+
+  function addOutline(pixels, ink) {
+    var out = pixels.slice();
+    var offsets = [
+      [-1, 0], [1, 0], [0, -1], [0, 1],
+      [-1, -1], [1, -1], [-1, 1], [1, 1]
+    ];
+    for (var y = 0; y < SIZE; y += 1) {
+      for (var x = 0; x < SIZE; x += 1) {
+        if (pixels[y * SIZE + x]) continue;
+        for (var i = 0; i < offsets.length; i += 1) {
+          var nx = x + offsets[i][0];
+          var ny = y + offsets[i][1];
+          if (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE && pixels[ny * SIZE + nx]) {
+            out[y * SIZE + x] = ink;
+            break;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  function createDesign(seed, variant) {
+    var palette = buildPalette(seed, variant);
+    var style = buildStyle(seed);
+    var pixels = new Array(SIZE * SIZE).fill(null);
+    drawBody(pixels, palette);
+    drawHead(pixels, palette);
+    drawHair(pixels, style.hair, palette);
+    drawFace(pixels, style, palette);
+    drawOutfit(pixels, style.outfit, palette);
+    drawAccessory(pixels, style.accessory, palette);
+    pixels = addOutline(pixels, palette.ink);
+    return { pixels: pixels, palette: palette, style: style };
+  }
+
+  function makeSwatches(pixels, palette) {
+    var out = [];
+
+    function add(color) {
+      var normalized = normalizeHex(color);
+      if (normalized && out.indexOf(normalized) === -1) out.push(normalized);
+    }
+
+    if (palette) {
+      add(palette.skin.base);
+      add(palette.skin.shade);
+      add(palette.hair.base);
+      add(palette.hair.shade);
+      add(palette.hair.light);
+      add(palette.outfit.base);
+      add(palette.outfit.shade);
+      add(palette.outfit.light);
+      add(palette.accent);
+      add(palette.ink);
+      add(palette.white);
+    }
+
+    var counts = {};
+    for (var i = 0; i < pixels.length; i += 1) {
+      var color = pixels[i];
+      if (color) counts[color] = (counts[color] || 0) + 1;
+    }
+    Object.keys(counts)
+      .sort(function (a, b) { return counts[b] - counts[a]; })
+      .forEach(add);
+
+    add("#ffffff");
+    add("#211c2b");
+    return out.slice(0, 12);
+  }
+
+  function snapshotState() {
+    return {
+      pixels: state.pixels.slice(),
+      seed: state.seed,
+      colorVariant: state.colorVariant,
+      palette: clonePalette(state.palette),
+      selectedColor: state.selectedColor
+    };
+  }
+
+  function pushHistory(snapshot) {
+    state.history.push(snapshot || snapshotState());
+    if (state.history.length > MAX_HISTORY) state.history.shift();
+  }
+
+  function restoreSnapshot(snapshot) {
+    state.pixels = snapshot.pixels.slice();
+    state.seed = snapshot.seed;
+    state.colorVariant = snapshot.colorVariant;
+    state.palette = clonePalette(snapshot.palette);
+    state.selectedColor = snapshot.selectedColor || state.selectedColor;
+    state.swatches = makeSwatches(state.pixels, state.palette);
+  }
+
+  function setStatus(text) {
+    state.status = text;
+    el.statusText.textContent = text;
+  }
+
+  function drawPixelsOnCanvas(target, pixels, scale) {
+    var context = target.getContext("2d");
+    target.width = SIZE * scale;
+    target.height = SIZE * scale;
+    context.imageSmoothingEnabled = false;
+    context.clearRect(0, 0, target.width, target.height);
+    for (var y = 0; y < SIZE; y += 1) {
+      for (var x = 0; x < SIZE; x += 1) {
+        var color = pixels[y * SIZE + x];
+        if (!color) continue;
+        context.fillStyle = color;
+        context.fillRect(x * scale, y * scale, scale, scale);
+      }
+    }
+  }
+
+  function renderAvatar() {
+    if (!ctx) return;
+    var width = PREVIEW_SIZE;
+    ctx.clearRect(0, 0, width, width);
+
+    for (var y = 0; y < SIZE; y += 1) {
+      for (var x = 0; x < SIZE; x += 1) {
+        var color = state.pixels[y * SIZE + x];
+        if (!color) continue;
+        ctx.fillStyle = color;
+        ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+      }
+    }
+
+    if (state.showGrid) {
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(36, 31, 45, 0.12)";
+      for (var i = 1; i < SIZE; i += 1) {
+        var line = i * CELL + 0.5;
+        ctx.moveTo(line, 0);
+        ctx.lineTo(line, width);
+        ctx.moveTo(0, line);
+        ctx.lineTo(width, line);
+      }
+      ctx.stroke();
+    }
+
+    var hasPixels = state.pixels.some(function (pixel) { return !!pixel; });
+    el.canvasEmpty.hidden = hasPixels;
+    el.canvas.setAttribute(
+      "aria-label",
+      "像素头像画布，种子 " + state.seed + "，点击或拖动绘制"
+    );
+  }
+
+  function renderPalette() {
+    el.palette.innerHTML = "";
+    var fragment = document.createDocumentFragment();
+
+    state.swatches.forEach(function (color) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "swatch";
+      button.dataset.color = color;
+      button.style.setProperty("--swatch", color);
+      button.style.setProperty("--check", isDark(color) ? "#fffdf8" : "#211c2b");
+      button.setAttribute("aria-label", "选择颜色 " + color.toUpperCase());
+      button.setAttribute("aria-pressed", color === state.selectedColor ? "true" : "false");
+      button.title = color.toUpperCase();
+      button.addEventListener("click", function () {
+        setSelectedColor(color);
+      });
+      fragment.appendChild(button);
+    });
+
+    el.palette.appendChild(fragment);
+    updatePaletteSelection();
+  }
+
+  function updatePaletteSelection() {
+    var buttons = el.palette.querySelectorAll(".swatch");
+    for (var i = 0; i < buttons.length; i += 1) {
+      var active = buttons[i].dataset.color === state.selectedColor;
+      buttons[i].setAttribute("aria-pressed", active ? "true" : "false");
+    }
+    el.currentChip.style.background = state.selectedColor;
+    el.currentHex.textContent = state.selectedColor.toUpperCase();
+    el.customColor.value = state.selectedColor;
+  }
+
+  function setSelectedColor(color) {
+    var normalized = normalizeHex(color);
+    if (!normalized) return;
+    state.selectedColor = normalized;
+    if (state.tool === "eraser" || state.tool === "picker") {
+      state.tool = "brush";
+    }
+    updateToolButtons();
+    updatePaletteSelection();
+  }
+
+  function setTool(tool) {
+    state.tool = tool;
+    updateToolButtons();
+  }
+
+  function updateToolButtons() {
+    var buttons = document.querySelectorAll(".tool-btn");
+    for (var i = 0; i < buttons.length; i += 1) {
+      buttons[i].setAttribute(
+        "aria-pressed",
+        buttons[i].dataset.tool === state.tool ? "true" : "false"
+      );
+    }
+    el.canvas.dataset.activeTool = state.tool;
+  }
+
+  function updateSwitches() {
+    el.mirrorBtn.setAttribute("aria-checked", state.mirror ? "true" : "false");
+    el.gridBtn.setAttribute("aria-checked", state.showGrid ? "true" : "false");
+  }
+
+  function updateMeta() {
+    el.seedLabel.textContent = "#" + state.seed;
+    el.undoBtn.disabled = state.history.length === 0;
+    el.galleryCount.textContent = state.snapshots.length + " / " + MAX_GALLERY;
+    updateSwitches();
+    updateToolButtons();
+  }
+
+  function renderAll() {
+    renderAvatar();
+    renderPalette();
+    updateMeta();
+  }
+
+  function popCanvas() {
+    el.canvasShell.classList.remove("pop");
+    void el.canvasShell.offsetWidth;
+    el.canvasShell.classList.add("pop");
+  }
+
+  function showToast(message) {
+    el.toast.textContent = message;
+    el.toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () {
+      el.toast.classList.remove("show");
+    }, 2300);
+  }
+
+  function generateNew(initial) {
+    if (!initial) {
+      pushHistory();
+      resetClearButton();
+    }
+    state.seed = makeSeed();
+    state.colorVariant = 0;
+    var design = createDesign(state.seed, state.colorVariant);
+    state.pixels = design.pixels;
+    state.palette = design.palette;
+    state.style = design.style;
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    state.selectedColor = design.palette.outfit.base;
+    setStatus(initial ? "点按画布，给它补上几笔" : "新面孔出炉，继续微调吧");
+    renderAll();
+    if (!initial) popCanvas();
+  }
+
+  function applyDesign(design, seed, variant) {
+    state.seed = seed;
+    state.colorVariant = variant;
+    state.pixels = design.pixels;
+    state.palette = design.palette;
+    state.style = design.style;
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    state.selectedColor = design.palette.outfit.base;
+  }
+
+  function recolor() {
+    if (!state.pixels.some(function (pixel) { return !!pixel; })) {
+      showToast("画布还是空的，先画点什么吧");
+      return;
+    }
+    if (!state.palette) {
+      showToast("这份设计没有配色信息，先随机生成新头像吧");
+      return;
+    }
+    pushHistory();
+    resetClearButton();
+    var oldPalette = state.palette;
+    var next = nextPalette(state.seed, state.colorVariant, oldPalette);
+    var newPalette = next.palette;
+    var roleNames = [
+      ["skin", "base"], ["skin", "shade"], ["skin", "light"],
+      ["hair", "base"], ["hair", "shade"], ["hair", "light"],
+      ["outfit", "base"], ["outfit", "shade"], ["outfit", "light"]
+    ];
+    var map = {};
+
+    roleNames.forEach(function (role) {
+      var from = oldPalette[role[0]][role[1]];
+      var to = newPalette[role[0]][role[1]];
+      if (from && to && !map[from]) map[from] = to;
+    });
+
+    ["accent", "accentLight", "accentShade", "brow", "mouth", "blush", "eye", "white", "ink"].forEach(function (key) {
+      var from = oldPalette[key];
+      var to = newPalette[key];
+      if (from && to && !map[from]) map[from] = to;
+    });
+
+    state.pixels = state.pixels.map(function (color) {
+      return color && map[color] ? map[color] : color;
+    });
+    state.palette = newPalette;
+    state.colorVariant = next.variant;
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    if (map[state.selectedColor]) state.selectedColor = map[state.selectedColor];
+    setStatus("换好新配色，形状没有变");
+    renderAll();
+    popCanvas();
+  }
+
+  function undo() {
+    if (!state.history.length) return;
+    var snapshot = state.history.pop();
+    restoreSnapshot(snapshot);
+    setStatus("已撤销上一步");
+    renderAll();
+    resetClearButton();
+  }
+
+  function paintAtCell(cell) {
+    if (!cell) return;
+    if (state.lastCell && state.lastCell.x === cell.x && state.lastCell.y === cell.y) return;
+    state.lastCell = cell;
+    var color = state.tool === "eraser" ? null : state.selectedColor;
+    var targets = [{ x: cell.x, y: cell.y }];
+    if (state.mirror) {
+      var mirrored = { x: SIZE - 1 - cell.x, y: cell.y };
+      if (mirrored.x !== cell.x) targets.push(mirrored);
+    }
+    var changed = false;
+    targets.forEach(function (target) {
+      var index = target.y * SIZE + target.x;
+      if (state.pixels[index] !== color) {
+        state.pixels[index] = color;
+        changed = true;
+      }
+    });
+    if (!changed) return;
+    state.strokeChanged = true;
+    if (!state.strokeStatusSet) {
+      state.strokeStatusSet = true;
+      setStatus("手绘中 · 松手后可撤销");
+    }
+    renderAvatar();
+  }
+
+  function getCellFromPointer(event) {
+    var rect = el.canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    var x = Math.floor(((event.clientX - rect.left) / rect.width) * SIZE);
+    var y = Math.floor(((event.clientY - rect.top) / rect.height) * SIZE);
+    if (x < 0 || y < 0 || x >= SIZE || y >= SIZE) return null;
+    return { x: x, y: y };
+  }
+
+  function pickColorAt(cell) {
+    var color = state.pixels[cell.y * SIZE + cell.x];
+    if (!color) {
+      showToast("这颗像素是透明的，换一处试试");
+      return;
+    }
+    state.selectedColor = color;
+    state.tool = "brush";
+    updateToolButtons();
+    updatePaletteSelection();
+    setStatus("吸管取色 " + color.toUpperCase());
+  }
+
+  function startStroke(event) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    resetClearButton();
+    var cell = getCellFromPointer(event);
+    if (!cell) return;
+    event.preventDefault();
+
+    if (state.tool === "picker") {
+      pickColorAt(cell);
+      return;
+    }
+
+    state.drawing = true;
+    state.strokeChanged = false;
+    state.strokeStatusSet = false;
+    state.lastCell = null;
+    state.strokeStart = snapshotState();
+    try { el.canvas.setPointerCapture(event.pointerId); } catch (err) { /* no-op */ }
+    paintAtCell(cell);
+  }
+
+  function moveStroke(event) {
+    if (!state.drawing) return;
+    if (event.pointerType === "mouse" && event.buttons === 0) {
+      finishStroke();
+      return;
+    }
+    var cell = getCellFromPointer(event);
+    if (!cell) return;
+    event.preventDefault();
+    paintAtCell(cell);
+  }
+
+  function finishStroke() {
+    if (!state.drawing) return;
+    state.drawing = false;
+    state.lastCell = null;
+    if (state.strokeChanged && state.strokeStart) {
+      pushHistory(state.strokeStart);
+      setStatus("手绘完成 · 可以继续或导出");
+    }
+    state.strokeStart = null;
+    state.strokeChanged = false;
+    state.strokeStatusSet = false;
+    updateMeta();
+  }
+
+  function resetClearButton() {
+    window.clearTimeout(clearTimer);
+    el.clearBtn.classList.remove("is-armed");
+    el.clearBtn.textContent = "清空画布";
+  }
+
+  function handleClear() {
+    var hasPixels = state.pixels.some(function (pixel) { return !!pixel; });
+    if (!hasPixels) {
+      showToast("画布已经是空的");
+      return;
+    }
+    if (!el.clearBtn.classList.contains("is-armed")) {
+      el.clearBtn.classList.add("is-armed");
+      el.clearBtn.textContent = "再点一次清空";
+      showToast("再点一次即可清空，撤销可恢复");
+      window.clearTimeout(clearTimer);
+      clearTimer = window.setTimeout(resetClearButton, 3200);
+      return;
+    }
+    resetClearButton();
+    pushHistory();
+    state.pixels = new Array(SIZE * SIZE).fill(null);
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    setStatus("画布已清空 · 可以撤销");
+    renderAll();
+    showToast("画布已清空");
+  }
+
+  function addSnapshot() {
+    if (!state.pixels.some(function (pixel) { return !!pixel; })) {
+      showToast("画布还是空的，先画点什么吧");
+      return;
+    }
+    if (state.snapshots.length >= MAX_GALLERY) {
+      showToast("画廊已满，先删掉一张再收藏吧");
+      return;
+    }
+    state.snapshots.unshift({
+      id: state.snapshotSeq++,
+      seed: state.seed,
+      colorVariant: state.colorVariant,
+      palette: clonePalette(state.palette),
+      pixels: state.pixels.slice()
+    });
+    renderGallery();
+    showToast("已收进本次画廊");
+  }
+
+  function loadSnapshot(entry) {
+    pushHistory();
+    state.pixels = entry.pixels.slice();
+    state.seed = entry.seed;
+    state.colorVariant = entry.colorVariant;
+    state.palette = clonePalette(entry.palette);
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    var firstColor = state.pixels.find(function (color) { return !!color; }) || "#ff6b5e";
+    state.selectedColor = state.palette ? state.palette.outfit.base : firstColor;
+    setStatus("已从本次画廊载入");
+    renderAll();
+    showToast("已载入这张头像");
+    if (window.matchMedia("(max-width: 719px)").matches) {
+      el.previewCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function renderGallery() {
+    el.gallery.innerHTML = "";
+    var hasItems = state.snapshots.length > 0;
+    el.gallery.hidden = !hasItems;
+    el.galleryEmpty.hidden = hasItems;
+    el.galleryCount.textContent = state.snapshots.length + " / " + MAX_GALLERY;
+
+    if (!hasItems) return;
+
+    var fragment = document.createDocumentFragment();
+    state.snapshots.forEach(function (entry, index) {
+      var item = document.createElement("article");
+      item.className = "gallery-item";
+
+      var loadButton = document.createElement("button");
+      loadButton.type = "button";
+      loadButton.className = "gallery-load";
+      loadButton.setAttribute("aria-label", "载入第 " + (index + 1) + " 个头像，种子 " + entry.seed);
+
+      var wrap = document.createElement("span");
+      wrap.className = "gallery-canvas-wrap";
+      var thumb = document.createElement("canvas");
+      thumb.className = "gallery-canvas";
+      thumb.width = SIZE * 16;
+      thumb.height = SIZE * 16;
+      thumb.setAttribute("aria-hidden", "true");
+      drawPixelsOnCanvas(thumb, entry.pixels, 16);
+      wrap.appendChild(thumb);
+
+      var meta = document.createElement("span");
+      meta.className = "gallery-meta";
+      var seed = document.createElement("span");
+      seed.textContent = "#" + entry.seed;
+      var count = document.createElement("span");
+      count.textContent = "第 " + (index + 1) + " 张";
+      meta.appendChild(seed);
+      meta.appendChild(count);
+
+      loadButton.appendChild(wrap);
+      loadButton.appendChild(meta);
+      loadButton.addEventListener("click", function () { loadSnapshot(entry); });
+
+      var removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "gallery-remove";
+      removeButton.setAttribute("aria-label", "从画廊移除第 " + (index + 1) + " 张头像");
+      removeButton.textContent = "×";
+      removeButton.addEventListener("click", function () {
+        state.snapshots = state.snapshots.filter(function (snapshot) {
+          return snapshot.id !== entry.id;
+        });
+        renderGallery();
+        showToast("已从画廊移除");
+      });
+
+      item.appendChild(loadButton);
+      item.appendChild(removeButton);
+      fragment.appendChild(item);
+    });
+    el.gallery.appendChild(fragment);
+  }
+
+  function getExportObject() {
+    var rows = [];
+    for (var y = 0; y < SIZE; y += 1) {
+      rows.push(state.pixels.slice(y * SIZE, (y + 1) * SIZE));
+    }
+    return {
+      app: "pixel-avatar-studio",
+      version: 1,
+      size: SIZE,
+      seed: state.seed,
+      colorVariant: state.colorVariant,
+      palette: clonePalette(state.palette),
+      pixels: rows
+    };
+  }
+
+  function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  function downloadDataUrl(dataUrl, filename) {
+    var link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  function exportPng() {
+    var canvas = document.createElement("canvas");
+    drawPixelsOnCanvas(canvas, state.pixels, EXPORT_SCALE);
+    var filename = "pixel-avatar-" + state.seed.toLowerCase() + ".png";
+    downloadDataUrl(canvas.toDataURL("image/png"), filename);
+    showToast("PNG 已生成，背景透明");
+  }
+
+  function exportJson() {
+    var text = JSON.stringify(getExportObject(), null, 2);
+    var blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    downloadBlob(blob, "pixel-avatar-" + state.seed.toLowerCase() + ".json");
+    showToast("JSON 文件已导出");
+  }
+
+  function legacyCopy(text) {
+    return new Promise(function (resolve, reject) {
+      var area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.top = "-1000px";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      area.setSelectionRange(0, text.length);
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+      area.remove();
+      if (ok) resolve();
+      else reject(new Error("copy failed"));
+    });
+  }
+
+  function copyDesign() {
+    var text = JSON.stringify(getExportObject());
+    var action;
+    if (navigator.clipboard && window.isSecureContext) {
+      action = navigator.clipboard.writeText(text).catch(function () {
+        return legacyCopy(text);
+      });
+    } else {
+      action = legacyCopy(text);
+    }
+    action.then(function () {
+      showToast("JSON 文本已复制，可粘贴到导入框");
+    }).catch(function () {
+      showToast("复制失败，请改用「导出 JSON」");
+    });
+  }
+
+  function normalizePalette(input) {
+    if (!input || typeof input !== "object") return null;
+    function roleGroup(name) {
+      var group = input[name];
+      if (!group || typeof group !== "object") return null;
+      var base = normalizeHex(group.base);
+      var shade = normalizeHex(group.shade);
+      var light = normalizeHex(group.light);
+      if (!base || !shade || !light) return null;
+      return { base: base, shade: shade, light: light };
+    }
+    var skin = roleGroup("skin");
+    var hair = roleGroup("hair");
+    var outfit = roleGroup("outfit");
+    var keys = ["accent", "accentLight", "accentShade", "brow", "mouth", "blush", "eye", "white", "ink"];
+    if (!skin || !hair || !outfit) return null;
+    var result = { skin: skin, hair: hair, outfit: outfit };
+    for (var i = 0; i < keys.length; i += 1) {
+      var value = normalizeHex(input[keys[i]]);
+      if (!value) return null;
+      result[keys[i]] = value;
+    }
+    return result;
+  }
+
+  function parseImportText(text) {
+    var parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (err) {
+      throw new Error("JSON 格式不正确");
+    }
+    if (!parsed || typeof parsed !== "object") throw new Error("不是有效的头像文件");
+    var size = Number(parsed.size || SIZE);
+    if (size !== SIZE) throw new Error("只支持 16 × 16 的头像");
+    var flat = parsed.pixels;
+    if (!Array.isArray(flat)) throw new Error("像素数据不完整");
+    if (flat.length === SIZE && flat.every(function (row) { return Array.isArray(row); })) {
+      flat = flat.reduce(function (all, row) { return all.concat(row); }, []);
+    }
+    if (flat.length !== SIZE * SIZE) throw new Error("像素数据不完整");
+    var pixels = flat.map(function (value) {
+      if (value === null || value === "" || value === "." || value === 0) return null;
+      var color = normalizeHex(value);
+      if (!color) throw new Error("颜色数据不正确");
+      return color;
+    });
+    return {
+      pixels: pixels,
+      seed: sanitizeSeed(parsed.seed),
+      colorVariant: Number.isInteger(parsed.colorVariant) ? parsed.colorVariant : 0,
+      palette: normalizePalette(parsed.palette)
+    };
+  }
+
+  function importDesignText(text) {
+    if (!text || !text.trim()) {
+      showToast("先粘贴一段 JSON 文本吧");
+      return;
+    }
+    var imported;
+    try {
+      imported = parseImportText(text);
+    } catch (err) {
+      showToast("导入失败：" + err.message);
+      return;
+    }
+    pushHistory();
+    resetClearButton();
+    state.pixels = imported.pixels;
+    state.seed = imported.seed;
+    state.colorVariant = imported.colorVariant;
+    state.palette = imported.palette;
+    state.style = null;
+    state.swatches = makeSwatches(state.pixels, state.palette);
+    var firstColor = state.pixels.find(function (color) { return !!color; }) || "#ff6b5e";
+    state.selectedColor = imported.palette ? imported.palette.outfit.base : firstColor;
+    setStatus("设计导入成功，可以继续改");
+    el.importText.value = "";
+    el.importDetails.open = false;
+    renderAll();
+    showToast("设计导入成功");
+  }
+
+  function handleFile(event) {
+    var file = event.target.files && event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      importDesignText(String(reader.result));
+      el.fileInput.value = "";
+    };
+    reader.onerror = function () {
+      showToast("文件读取失败，请再试一次");
+      el.fileInput.value = "";
+    };
+    reader.readAsText(file);
+  }
+
+  function cacheElements() {
+    el.canvas = document.getElementById("avatarCanvas");
+    el.canvasShell = document.getElementById("canvasShell");
+    el.canvasEmpty = document.getElementById("canvasEmpty");
+    el.seedLabel = document.getElementById("seedLabel");
+    el.statusText = document.getElementById("statusText");
+    el.palette = document.getElementById("palette");
+    el.currentChip = document.getElementById("currentChip");
+    el.currentHex = document.getElementById("currentHex");
+    el.customColor = document.getElementById("customColor");
+    el.mirrorBtn = document.getElementById("mirrorBtn");
+    el.gridBtn = document.getElementById("gridBtn");
+    el.undoBtn = document.getElementById("undoBtn");
+    el.generateBtn = document.getElementById("generateBtn");
+    el.recolorBtn = document.getElementById("recolorBtn");
+    el.snapshotBtn = document.getElementById("snapshotBtn");
+    el.clearBtn = document.getElementById("clearBtn");
+    el.pngBtn = document.getElementById("pngBtn");
+    el.jsonBtn = document.getElementById("jsonBtn");
+    el.copyBtn = document.getElementById("copyBtn");
+    el.importText = document.getElementById("importText");
+    el.importDetails = document.getElementById("importDetails");
+    el.importTextBtn = document.getElementById("importTextBtn");
+    el.importFileBtn = document.getElementById("importFileBtn");
+    el.fileInput = document.getElementById("fileInput");
+    el.gallery = document.getElementById("gallery");
+    el.galleryEmpty = document.getElementById("galleryEmpty");
+    el.galleryCount = document.getElementById("galleryCount");
+    el.toast = document.getElementById("toast");
+    el.previewCard = document.getElementById("previewCard");
+    el.toolButtons = document.querySelectorAll(".tool-btn");
+  }
+
+  function bindEvents() {
+    el.generateBtn.addEventListener("click", function () { generateNew(false); });
+    el.recolorBtn.addEventListener("click", recolor);
+    el.undoBtn.addEventListener("click", undo);
+    el.snapshotBtn.addEventListener("click", addSnapshot);
+    el.clearBtn.addEventListener("click", handleClear);
+
+    el.toolButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        setTool(button.dataset.tool);
+      });
+    });
+
+    el.mirrorBtn.addEventListener("click", function () {
+      state.mirror = !state.mirror;
+      updateSwitches();
+      showToast(state.mirror ? "对称绘制已开启" : "对称绘制已关闭");
+    });
+
+    el.gridBtn.addEventListener("click", function () {
+      state.showGrid = !state.showGrid;
+      updateSwitches();
+      renderAvatar();
+    });
+
+    el.customColor.addEventListener("input", function (event) {
+      setSelectedColor(event.target.value);
+    });
+
+    el.canvas.addEventListener("pointerdown", startStroke);
+    el.canvas.addEventListener("pointermove", moveStroke);
+    el.canvas.addEventListener("pointerup", finishStroke);
+    el.canvas.addEventListener("pointercancel", finishStroke);
+    el.canvas.addEventListener("lostpointercapture", finishStroke);
+    el.canvas.addEventListener("contextmenu", function (event) { event.preventDefault(); });
+
+    document.addEventListener("keydown", function (event) {
+      var target = event.target;
+      var tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+      if (tag === "textarea" || tag === "input") return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undo();
+      }
+    });
+
+    el.pngBtn.addEventListener("click", exportPng);
+    el.jsonBtn.addEventListener("click", exportJson);
+    el.copyBtn.addEventListener("click", copyDesign);
+    el.importTextBtn.addEventListener("click", function () {
+      importDesignText(el.importText.value);
+    });
+    el.importFileBtn.addEventListener("click", function () { el.fileInput.click(); });
+    el.fileInput.addEventListener("change", handleFile);
+  }
+
+  function init() {
+    cacheElements();
+    if (!el.canvas || !el.canvas.getContext) {
+      setStatus("当前浏览器不支持画布");
+      return;
+    }
+    ctx = el.canvas.getContext("2d");
+    el.canvas.width = PREVIEW_SIZE;
+    el.canvas.height = PREVIEW_SIZE;
+    ctx.imageSmoothingEnabled = false;
+    bindEvents();
+    generateNew(true);
+    renderGallery();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间计算器</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            margin-top: 0;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="datetime-local"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            font-size: 16px;
+            padding: 12px;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .result-box {
+            background-color: #e8f4fd;
+            border: 1px solid #b6dcfc;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .result-time {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .helper-text {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⏱️ 时间计算器</h2>
+
+    <!-- 初始时间设置 -->
+    <div class="section">
+        <label for="startTime">初始时间</label>
+        <input type="datetime-local" id="startTime">
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="setNow()">📍 获取当前时间</button>
+        </div>
+    </div>
+
+    <!-- 时间增减设置 -->
+    <div class="section">
+        <label>计算设置 (加减时间)</label>
+        <div class="input-row">
+            <div class="input-group">
+                <input type="number" id="days" placeholder="天" value="0">
+            </div>
+            <div class="input-group">
+                <input type="number" id="hours" placeholder="时" value="0">
+            </div>
+            <div class="input-group">
+                <input type="number" id="minutes" placeholder="分" value="0">
+            </div>
+            <div class="input-group">
+                <input type="number" id="seconds" placeholder="秒" value="0">
+            </div>
+        </div>
+        <div class="helper-text">输入正数表示增加，输入负数表示减去</div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <button class="btn-primary" onclick="calculateTime()">开始计算</button>
+
+    <!-- 结果显示 -->
+    <div class="section" style="margin-top: 20px; border: none;">
+        <label>计算结果</label>
+        <div class="result-box">
+            <span id="resultDate"></span>
+            <span class="result-time" id="resultTime">--:--:--</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 初始化：页面加载时设置当前时间
+    window.onload = function() {
+        setNow();
+    };
+
+    // 获取当前时间并格式化填入输入框
+    function setNow() {
+        const now = new Date();
+        // 转换为本地格式字符串 YYYY-MM-DDTHH:mm
+        // 注意：datetime-local 需要格式 YYYY-MM-DDThh:mm
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById('startTime').value = formattedDate;
+    }
+
+    // 核心计算逻辑
+    function calculateTime() {
+        // 1. 获取初始时间
+        const startInput = document.getElementById('startTime').value;
+        if (!startInput) {
+            alert("请先设置初始时间！");
+            return;
+        }
+        let baseDate = new Date(startInput);
+
+        // 2. 获取增量
+        const d = parseInt(document.getElementById('days').value) || 0;
+        const h = parseInt(document.getElementById('hours').value) || 0;
+        const m = parseInt(document.getElementById('minutes').value) || 0;
+        const s = parseInt(document.getElementById('seconds').value) || 0;
+
+        // 3. 执行计算 (使用毫秒计算以确保准确性)
+        // 1天 = 86400000毫秒, 1小时 = 3600000毫秒, etc.
+        const totalMilliseconds = (d * 86400000) + (h * 3600000) + (m * 60000) + (s * 1000);
+        
+        const resultDate = new Date(baseDate.getTime() + totalMilliseconds);
+
+        // 4. 格式化输出结果
+        const optionsDate = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+
+        document.getElementById('resultDate').innerText = resultDate.toLocaleDateString('zh-CN', optionsDate);
+        document.getElementById('resultTime').innerText = resultDate.toLocaleTimeString('zh-CN', optionsTime);
+    }
+</script>
+
+</body>
+</html>

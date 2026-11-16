@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3eee0">
+  <meta name="description" content="角尺 GONLAB 是一个为测绘工程设计的本地角度计算器：度分秒转换、角度加减、坐标方位角、夹角与导线角度闭合差。">
+  <title>角尺 GONLAB · 测绘角度计算器</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/archivo-black-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <noscript>
+    <div style="margin:0;padding:14px 18px;border-bottom:3px solid #111;background:#ffd23f;font:700 13px/1.6 sans-serif">
+      本工具需要 JavaScript 才能运行。请在浏览器设置中启用 JavaScript 后刷新页面。
+    </div>
+  </noscript>
+
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#convert" aria-label="角尺 GONLAB 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-angle">∟</span>
+          <span class="brand-degree">°</span>
+        </span>
+        <span class="brand-copy">
+          <span class="brand-name">角尺</span>
+          <span class="brand-sub">GONLAB / SURVEY ANGLES</span>
+        </span>
+      </a>
+      <div class="header-meta">
+        <span class="edition-tag">FIELD EDITION · 01</span>
+        <button class="btn btn-history" id="history-open" type="button" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>记录</span>
+          <span class="count-badge" id="history-count" hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>DMS → 十进制度</span><i>✳</i>
+      <span>角度加减</span><i>✳</i>
+      <span>坐标反算 AZIMUTH</span><i>✳</i>
+      <span>导线闭合差</span><i>✳</i>
+      <span>本地计算 · 数据不上传</span><i>✳</i>
+      <span>DMS → 十进制度</span><i>✳</i>
+      <span>角度加减</span><i>✳</i>
+      <span>坐标反算 AZIMUTH</span><i>✳</i>
+      <span>导线闭合差</span><i>✳</i>
+      <span>本地计算 · 数据不上传</span><i>✳</i>
+    </div>
+  </div>
+
+  <main class="shell main-content" id="main">
+
+    <!-- ================= 01 角度转换 ================= -->
+    <section class="view view-convert" id="view-convert" data-view="convert" hidden>
+      <header class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow"><span class="eyebrow-index">01</span> CONVERTER <span class="eyebrow-slash">/</span> DMS ⇄ DECIMAL</p>
+          <h1>角度<span class="title-highlight">转换</span><span class="title-dot">。</span></h1>
+          <p class="page-desc">度分秒、十进制度、弧度与百分度，一处输入，实时互换。粘贴测量记录中的角度也能直接识别。</p>
+        </div>
+        <div class="head-stamp" aria-hidden="true">
+          <span class="stamp-number">01</span>
+          <span class="stamp-label">DMS<br>⇄<br>DEC</span>
+        </div>
+      </header>
+
+      <div class="tool-grid tool-grid-convert">
+        <section class="card input-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">INPUT / 输入</p>
+              <h2>一个角度，三种写法</h2>
+            </div>
+            <button class="text-btn" id="conv-reset" type="button">清空</button>
+          </div>
+
+          <div class="field-block">
+            <div class="field-label-row">
+              <span class="field-label">度分秒 <small>DMS</small></span>
+              <span class="micro-note">分、秒可含小数</span>
+            </div>
+            <div class="dms-input dms-input-lg" role="group" aria-label="输入度分秒">
+              <label class="dms-cell">
+                <input id="conv-deg" type="text" inputmode="decimal" autocomplete="off" value="45" aria-label="度">
+                <span>度 <b>°</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="conv-min" type="text" inputmode="decimal" autocomplete="off" value="30" aria-label="分">
+                <span>分 <b>′</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="conv-sec" type="text" inputmode="decimal" autocomplete="off" value="0" aria-label="秒">
+                <span>秒 <b>″</b></span>
+              </label>
+            </div>
+            <p class="field-hint">负角可直接在“度”中输入负号。秒最多建议保留 0.1″。</p>
+          </div>
+
+          <div class="or-divider"><span>OR / 也可以直接粘贴或输入十进制度</span></div>
+
+          <label class="decimal-field">
+            <span class="field-label">十进制度 <small>DECIMAL DEGREE</small></span>
+            <span class="decimal-input-wrap">
+              <input id="conv-dec" type="text" inputmode="decimal" autocomplete="off" value="45.5" placeholder="例如 45.504167 或 45°30′15″">
+              <span class="unit-suffix">°</span>
+            </span>
+          </label>
+
+          <div class="preset-block">
+            <span class="micro-label">常用角度</span>
+            <div class="chip-row">
+              <button class="chip" type="button" data-conv-preset="30">30°</button>
+              <button class="chip" type="button" data-conv-preset="45">45°</button>
+              <button class="chip" type="button" data-conv-preset="60">60°</button>
+              <button class="chip" type="button" data-conv-preset="90">90°</button>
+              <button class="chip" type="button" data-conv-preset="180">180°</button>
+              <button class="chip" type="button" data-conv-preset="270">270°</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card result-card result-yellow" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <p class="card-kicker">RESULT / 结果</p>
+              <span class="result-type">标准度分秒</span>
+            </div>
+            <div class="result-actions">
+              <button class="mini-btn" type="button" data-copy-target="conv-dms-out">复制</button>
+              <button class="mini-btn mini-btn-dark js-save" type="button" data-tool="convert">＋ 记录</button>
+            </div>
+          </div>
+
+          <div class="result-main-value" id="conv-dms-out">45°30′00.0″</div>
+          <p class="result-caption" id="conv-caption">45 度 30 分 0 秒 · 正角</p>
+
+          <div class="unit-grid">
+            <div class="unit-cell">
+              <span class="unit-label">十进制度</span>
+              <strong id="conv-dec-out">45.500000°</strong>
+              <button class="copy-tiny" type="button" data-copy-target="conv-dec-out" aria-label="复制十进制度">复制</button>
+            </div>
+            <div class="unit-cell">
+              <span class="unit-label">弧度</span>
+              <strong id="conv-rad-out">0.794125 rad</strong>
+              <button class="copy-tiny" type="button" data-copy-target="conv-rad-out" aria-label="复制弧度">复制</button>
+            </div>
+            <div class="unit-cell">
+              <span class="unit-label">百分度</span>
+              <strong id="conv-gon-out">50.555556 gon</strong>
+              <button class="copy-tiny" type="button" data-copy-target="conv-gon-out" aria-label="复制百分度">复制</button>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <span class="micro-label">拆解 / BREAKDOWN</span>
+            <code id="conv-breakdown">45° + 30′ + 0″ ÷ 3600 = 45.500000°</code>
+          </div>
+
+          <div class="result-footnote">
+            <span>1° = 60′ = 3600″</span>
+            <span>1 gon = 0.9°</span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="formula-strip">
+        <span class="formula-tag">NOTE</span>
+        <p><strong>度分秒 → 十进制度：</strong><code>DEC = D + M / 60 + S / 3600</code>。测量记录里的 60 进制在这里自动处理，不用再手算进位。</p>
+      </aside>
+    </section>
+
+    <!-- ================= 02 角度运算 ================= -->
+    <section class="view view-ops" id="view-ops" data-view="ops" hidden>
+      <header class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow"><span class="eyebrow-index">02</span> ARITHMETIC <span class="eyebrow-slash">/</span> ANGLE + &amp; −</p>
+          <h1>角度<span class="title-highlight">运算</span><span class="title-dot">。</span></h1>
+          <p class="page-desc">两个观测角相加或相减，自动完成 60 进制进位与 0°–360° 归一化，把容易出错的步骤交给机器。</p>
+        </div>
+        <div class="head-stamp" aria-hidden="true">
+          <span class="stamp-number">02</span>
+          <span class="stamp-label">A ± B<br>DMS</span>
+        </div>
+      </header>
+
+      <div class="tool-grid tool-grid-ops">
+        <section class="card input-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">OPERANDS / 操作数</p>
+              <h2>输入角 A 与角 B</h2>
+            </div>
+            <button class="text-btn" id="op-reset" type="button">清空</button>
+          </div>
+
+          <div class="operand">
+            <span class="operand-tag">A</span>
+            <div class="dms-input" role="group" aria-label="角度 A">
+              <label class="dms-cell">
+                <input id="op-a-deg" type="text" inputmode="decimal" autocomplete="off" value="128" aria-label="角 A 度">
+                <span>度 <b>°</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="op-a-min" type="text" inputmode="decimal" autocomplete="off" value="32" aria-label="角 A 分">
+                <span>分 <b>′</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="op-a-sec" type="text" inputmode="decimal" autocomplete="off" value="18" aria-label="角 A 秒">
+                <span>秒 <b>″</b></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="operator-row" role="group" aria-label="选择运算">
+            <button class="operator-btn is-active" type="button" data-op="add" aria-pressed="true">
+              <span class="operator-symbol">＋</span><span>相加</span>
+            </button>
+            <button class="operator-btn" type="button" data-op="subtract" aria-pressed="false">
+              <span class="operator-symbol">−</span><span>相减</span>
+            </button>
+          </div>
+
+          <div class="operand">
+            <span class="operand-tag operand-tag-b">B</span>
+            <div class="dms-input" role="group" aria-label="角度 B">
+              <label class="dms-cell">
+                <input id="op-b-deg" type="text" inputmode="decimal" autocomplete="off" value="52" aria-label="角 B 度">
+                <span>度 <b>°</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="op-b-min" type="text" inputmode="decimal" autocomplete="off" value="19" aria-label="角 B 分">
+                <span>分 <b>′</b></span>
+              </label>
+              <label class="dms-cell">
+                <input id="op-b-sec" type="text" inputmode="decimal" autocomplete="off" value="44" aria-label="角 B 秒">
+                <span>秒 <b>″</b></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <label class="switch-row">
+              <input id="op-normalize" type="checkbox" checked>
+              <span class="switch-ui" aria-hidden="true"></span>
+              <span>结果归一化到 0°–360°</span>
+            </label>
+            <button class="text-btn" id="op-swap" type="button">交换 A / B</button>
+          </div>
+        </section>
+
+        <section class="card result-card result-cyan" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <p class="card-kicker">RESULT / 结果</p>
+              <span class="result-type" id="op-result-type">A ＋ B</span>
+            </div>
+            <div class="result-actions">
+              <button class="mini-btn" type="button" data-copy-target="op-result-dms">复制</button>
+              <button class="mini-btn mini-btn-dark js-save" type="button" data-tool="ops">＋ 记录</button>
+            </div>
+          </div>
+
+          <div class="result-main-value" id="op-result-dms">180°52′02.0″</div>
+          <p class="result-caption" id="op-result-caption">十进制度 180.867222°</p>
+
+          <div class="unit-grid unit-grid-2">
+            <div class="unit-cell">
+              <span class="unit-label">原始结果</span>
+              <strong id="op-raw-out">180°52′02.0″</strong>
+            </div>
+            <div class="unit-cell">
+              <span class="unit-label">0°–360° 归一化</span>
+              <strong id="op-normalized-out">180°52′02.0″</strong>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <span class="micro-label">算式 / EQUATION</span>
+            <code id="op-equation">128°32′18″ ＋ 52°19′44″ = 180°52′02.0″</code>
+          </div>
+
+          <div class="result-footnote">
+            <span>60″ = 1′ · 60′ = 1°</span>
+            <span>负数表示逆时针差值</span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="formula-strip">
+        <span class="formula-tag">TIP</span>
+        <p>导线中的角值改正也可以先在这里验算：先求闭合差，再用<strong>相反符号</strong>平均分配到各观测角。</p>
+      </aside>
+    </section>
+
+    <!-- ================= 03 坐标方位角 ================= -->
+    <section class="view view-azimuth" id="view-azimuth" data-view="azimuth" hidden>
+      <header class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow"><span class="eyebrow-index">03</span> AZIMUTH <span class="eyebrow-slash">/</span> COORDINATE INVERSE</p>
+          <h1>坐标<span class="title-highlight">方位角</span><span class="title-dot">。</span></h1>
+          <p class="page-desc">由两点坐标或坐标增量反算方位角、水平距离、反方位角与象限角。默认按测量坐标系 <strong>X 北 / Y 东</strong> 计算。</p>
+        </div>
+        <div class="head-stamp" aria-hidden="true">
+          <span class="stamp-number">03</span>
+          <span class="stamp-label">α<br>AZ</span>
+        </div>
+      </header>
+
+      <div class="tool-grid tool-grid-azimuth">
+        <section class="card input-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">COORDINATES / 坐标输入</p>
+              <h2>定义一条方向线</h2>
+            </div>
+            <button class="text-btn" id="az-reset" type="button">清空</button>
+          </div>
+
+          <div class="segmented" role="group" aria-label="坐标输入模式">
+            <button class="segment is-active" type="button" data-az-mode="points" aria-pressed="true">两点坐标</button>
+            <button class="segment" type="button" data-az-mode="delta" aria-pressed="false">坐标增量</button>
+          </div>
+
+          <div class="coordinate-legend" aria-label="坐标轴约定">
+            <span><b>X</b> = 北 ↑</span>
+            <span><b>Y</b> = 东 →</span>
+            <span><b>α</b> 自北顺时针</span>
+          </div>
+
+          <div id="az-panel-points">
+            <div class="point-block">
+              <div class="point-title"><span class="point-dot"></span>P1 <small>起点</small></div>
+              <div class="xy-grid">
+                <label class="input-field"><span>X₁ <em>北</em></span><input id="az-x1" type="text" inputmode="decimal" autocomplete="off" value="500.000"></label>
+                <label class="input-field"><span>Y₁ <em>东</em></span><input id="az-y1" type="text" inputmode="decimal" autocomplete="off" value="800.000"></label>
+              </div>
+            </div>
+            <div class="point-block">
+              <div class="point-title"><span class="point-dot point-dot-b"></span>P2 <small>终点</small></div>
+              <div class="xy-grid">
+                <label class="input-field"><span>X₂ <em>北</em></span><input id="az-x2" type="text" inputmode="decimal" autocomplete="off" value="530.000"></label>
+                <label class="input-field"><span>Y₂ <em>东</em></span><input id="az-y2" type="text" inputmode="decimal" autocomplete="off" value="840.000"></label>
+              </div>
+            </div>
+          </div>
+
+          <div id="az-panel-delta" hidden>
+            <div class="xy-grid">
+              <label class="input-field"><span>ΔX <em>北向增量</em></span><input id="az-dx" type="text" inputmode="decimal" autocomplete="off" value="30.000"></label>
+              <label class="input-field"><span>ΔY <em>东向增量</em></span><input id="az-dy" type="text" inputmode="decimal" autocomplete="off" value="40.000"></label>
+            </div>
+            <p class="field-hint">ΔX = X₂ − X₁，ΔY = Y₂ − Y₁。两个增量都为 0 时方位角无定义。</p>
+          </div>
+
+          <button class="btn btn-outline btn-wide" id="az-swap" type="button">交换起点 ↔ 终点</button>
+
+          <div class="preset-block">
+            <span class="micro-label">象限示例</span>
+            <div class="chip-row">
+              <button class="chip" type="button" data-az-preset="ne">北东</button>
+              <button class="chip" type="button" data-az-preset="se">南东</button>
+              <button class="chip" type="button" data-az-preset="sw">南西</button>
+              <button class="chip" type="button" data-az-preset="nw">北西</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card result-card result-pink" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <p class="card-kicker">RESULT / 反算结果</p>
+              <span class="result-type">方位角 α</span>
+            </div>
+            <div class="result-actions">
+              <button class="mini-btn" type="button" data-copy-target="az-dms">复制</button>
+              <button class="mini-btn mini-btn-dark js-save" type="button" data-tool="azimuth">＋ 记录</button>
+            </div>
+          </div>
+
+          <div class="azimuth-feature">
+            <div class="azimuth-copy">
+              <div class="result-main-value result-main-value-sm" id="az-dms">53°07′48.4″</div>
+              <p class="result-caption" id="az-dec">十进制度 53.130102°</p>
+              <span class="quadrant-stamp" id="az-quad">北东 · 53°07′48.4″</span>
+            </div>
+            <div class="compass-wrap">
+              <svg class="compass" id="az-compass" viewBox="0 0 240 240" role="img" aria-label="方位角示意图，方位角 53 度">
+                <defs>
+                  <marker id="az-arrow" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+                  </marker>
+                </defs>
+                <rect x="5" y="5" width="230" height="230" class="compass-frame"></rect>
+                <g class="compass-grid">
+                  <line x1="120" y1="20" x2="120" y2="220"></line>
+                  <line x1="20" y1="120" x2="220" y2="120"></line>
+                  <circle cx="120" cy="120" r="82"></circle>
+                  <circle cx="120" cy="120" r="4"></circle>
+                </g>
+                <g class="compass-ticks" aria-hidden="true">
+                  <line x1="120" y1="31" x2="120" y2="38"></line>
+                  <line x1="208.5" y1="120" x2="201.5" y2="120"></line>
+                  <line x1="120" y1="209" x2="120" y2="202"></line>
+                  <line x1="31.5" y1="120" x2="38.5" y2="120"></line>
+                  <line x1="182.7" y1="57.3" x2="177.8" y2="62.2"></line>
+                  <line x1="182.7" y1="182.7" x2="177.8" y2="177.8"></line>
+                  <line x1="57.3" y1="182.7" x2="62.2" y2="177.8"></line>
+                  <line x1="57.3" y1="57.3" x2="62.2" y2="62.2"></line>
+                </g>
+                <g class="compass-labels" aria-hidden="true">
+                  <text x="120" y="19" text-anchor="middle">北</text>
+                  <text x="225" y="125" text-anchor="middle">东</text>
+                  <text x="120" y="231" text-anchor="middle">南</text>
+                  <text x="15" y="125" text-anchor="middle">西</text>
+                </g>
+                <path id="az-arc" class="compass-arc" d="" fill="none"></path>
+                <line id="az-vector" class="compass-vector" x1="120" y1="120" x2="120" y2="48" marker-end="url(#az-arrow)"></line>
+                <text id="az-arc-label" class="compass-arc-label" x="143" y="72" text-anchor="middle">53°</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-cell">
+              <span class="stat-label">水平距离 D</span>
+              <strong id="az-dist">50.000 m</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">反方位角 α + 180°</span>
+              <strong id="az-back">233°07′48.4″</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">坐标增量</span>
+              <strong id="az-dxdy">ΔX +30.000 / ΔY +40.000</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">象限角</span>
+              <strong id="az-bearing">北东 53°07′48.4″</strong>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <span class="micro-label">公式 / FORMULA</span>
+            <code id="az-formula">α = atan2(ΔY, ΔX) = atan2(40.000, 30.000) = 53.130102°</code>
+          </div>
+        </section>
+      </div>
+
+      <aside class="formula-strip">
+        <span class="formula-tag">CHECK</span>
+        <p><strong>先看象限再算角：</strong>测量坐标中 X 轴指向北、Y 轴指向东，方位角从北方向顺时针量取。若软件使用数学坐标（X 东 / Y 北），需先交换坐标轴。</p>
+      </aside>
+    </section>
+
+    <!-- ================= 04 夹角计算 ================= -->
+    <section class="view view-included" id="view-included" data-view="included" hidden>
+      <header class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow"><span class="eyebrow-index">04</span> INCLUDED ANGLE <span class="eyebrow-slash">/</span> LEFT &amp; RIGHT</p>
+          <h1>夹角<span class="title-highlight">计算</span><span class="title-dot">。</span></h1>
+          <p class="page-desc">已知两个方向，或给出后视点、测站点、前视点，求出顺时针夹角、逆时针夹角与较小夹角。</p>
+        </div>
+        <div class="head-stamp" aria-hidden="true">
+          <span class="stamp-number">04</span>
+          <span class="stamp-label">∠<br>L / R</span>
+        </div>
+      </header>
+
+      <div class="tool-grid tool-grid-included">
+        <section class="card input-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">DIRECTIONS / 方向</p>
+              <h2>定义两条方向线</h2>
+            </div>
+            <button class="text-btn" id="inc-reset" type="button">清空</button>
+          </div>
+
+          <div class="segmented" role="group" aria-label="夹角输入模式">
+            <button class="segment is-active" type="button" data-inc-mode="azimuth" aria-pressed="true">两个方位角</button>
+            <button class="segment" type="button" data-inc-mode="points" aria-pressed="false">三点坐标</button>
+          </div>
+
+          <div id="inc-panel-azimuth">
+            <div class="direction-block">
+              <div class="direction-head"><span class="direction-tag">A</span><span>方向 A 的方位角</span></div>
+              <div class="dms-input" role="group" aria-label="方向 A 方位角">
+                <label class="dms-cell"><input id="inc-a-deg" type="text" inputmode="decimal" autocomplete="off" value="45" aria-label="方向 A 度"><span>度 <b>°</b></span></label>
+                <label class="dms-cell"><input id="inc-a-min" type="text" inputmode="decimal" autocomplete="off" value="0" aria-label="方向 A 分"><span>分 <b>′</b></span></label>
+                <label class="dms-cell"><input id="inc-a-sec" type="text" inputmode="decimal" autocomplete="off" value="0" aria-label="方向 A 秒"><span>秒 <b>″</b></span></label>
+              </div>
+            </div>
+            <div class="direction-block">
+              <div class="direction-head"><span class="direction-tag direction-tag-b">B</span><span>方向 B 的方位角</span></div>
+              <div class="dms-input" role="group" aria-label="方向 B 方位角">
+                <label class="dms-cell"><input id="inc-b-deg" type="text" inputmode="decimal" autocomplete="off" value="135" aria-label="方向 B 度"><span>度 <b>°</b></span></label>
+                <label class="dms-cell"><input id="inc-b-min" type="text" inputmode="decimal" autocomplete="off" value="0" aria-label="方向 B 分"><span>分 <b>′</b></span></label>
+                <label class="dms-cell"><input id="inc-b-sec" type="text" inputmode="decimal" autocomplete="off" value="0" aria-label="方向 B 秒"><span>秒 <b>″</b></span></label>
+              </div>
+            </div>
+            <button class="btn btn-outline btn-wide" id="inc-swap" type="button">交换方向 A ↔ B</button>
+          </div>
+
+          <div id="inc-panel-points" hidden>
+            <div class="point-block">
+              <div class="point-title"><span class="point-dot"></span>A <small>后视点</small></div>
+              <div class="xy-grid">
+                <label class="input-field"><span>Xₐ <em>北</em></span><input id="inc-ax" type="text" inputmode="decimal" autocomplete="off" value="1030.000"></label>
+                <label class="input-field"><span>Yₐ <em>东</em></span><input id="inc-ay" type="text" inputmode="decimal" autocomplete="off" value="1030.000"></label>
+              </div>
+            </div>
+            <div class="point-block point-block-station">
+              <div class="point-title"><span class="point-dot point-dot-o"></span>O <small>测站点</small></div>
+              <div class="xy-grid">
+                <label class="input-field"><span>Xₒ <em>北</em></span><input id="inc-ox" type="text" inputmode="decimal" autocomplete="off" value="1000.000"></label>
+                <label class="input-field"><span>Yₒ <em>东</em></span><input id="inc-oy" type="text" inputmode="decimal" autocomplete="off" value="1000.000"></label>
+              </div>
+            </div>
+            <div class="point-block">
+              <div class="point-title"><span class="point-dot point-dot-b"></span>B <small>前视点</small></div>
+              <div class="xy-grid">
+                <label class="input-field"><span>Xᵦ <em>北</em></span><input id="inc-bx" type="text" inputmode="decimal" autocomplete="off" value="970.000"></label>
+                <label class="input-field"><span>Yᵦ <em>东</em></span><input id="inc-by" type="text" inputmode="decimal" autocomplete="off" value="1030.000"></label>
+              </div>
+            </div>
+            <p class="field-hint">方位角由测站点 O 分别指向 A 与 B。三点不可重合。</p>
+          </div>
+        </section>
+
+        <section class="card result-card result-lime" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <p class="card-kicker">RESULT / 夹角</p>
+              <span class="result-type">顺时针 · 右角</span>
+            </div>
+            <div class="result-actions">
+              <button class="mini-btn" type="button" data-copy-target="inc-right-out">复制</button>
+              <button class="mini-btn mini-btn-dark js-save" type="button" data-tool="included">＋ 记录</button>
+            </div>
+          </div>
+
+          <div class="included-feature">
+            <div class="included-copy">
+              <span class="feature-label">从 A 顺时针转到 B</span>
+              <div class="result-main-value result-main-value-sm" id="inc-right-out">90°00′00.0″</div>
+              <p class="result-caption" id="inc-caption">右角 / CLOCKWISE</p>
+              <span class="direction-chip" id="inc-directions">A 45°00′00.0″ → B 135°00′00.0″</span>
+            </div>
+            <div class="compass-wrap compass-wrap-small">
+              <svg class="compass compass-rays" id="inc-compass" viewBox="0 0 240 240" role="img" aria-label="夹角示意图">
+                <defs>
+                  <marker id="inc-arrow-a" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+                  </marker>
+                  <marker id="inc-arrow-b" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+                  </marker>
+                </defs>
+                <rect x="5" y="5" width="230" height="230" class="compass-frame"></rect>
+                <g class="compass-grid">
+                  <line x1="120" y1="20" x2="120" y2="220"></line>
+                  <line x1="20" y1="120" x2="220" y2="120"></line>
+                  <circle cx="120" cy="120" r="82"></circle>
+                  <circle cx="120" cy="120" r="4"></circle>
+                </g>
+                <g class="compass-labels" aria-hidden="true">
+                  <text x="120" y="19" text-anchor="middle">北</text>
+                  <text x="225" y="125" text-anchor="middle">东</text>
+                  <text x="120" y="231" text-anchor="middle">南</text>
+                  <text x="15" y="125" text-anchor="middle">西</text>
+                </g>
+                <path id="inc-wedge" class="angle-wedge" d=""></path>
+                <path id="inc-arc" class="compass-arc" d="" fill="none"></path>
+                <line id="inc-ray-a" class="compass-vector ray-a" x1="120" y1="120" x2="120" y2="42" marker-end="url(#inc-arrow-a)"></line>
+                <line id="inc-ray-b" class="compass-vector ray-b" x1="120" y1="120" x2="120" y2="42" marker-end="url(#inc-arrow-b)"></line>
+                <text id="inc-label-a" class="ray-label ray-label-a" x="120" y="34" text-anchor="middle">A</text>
+                <text id="inc-label-b" class="ray-label ray-label-b" x="120" y="34" text-anchor="middle">B</text>
+                <text id="inc-arc-label" class="compass-arc-label" x="150" y="80" text-anchor="middle">90°</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="stat-grid stat-grid-3">
+            <div class="stat-cell">
+              <span class="stat-label">逆时针 · 左角</span>
+              <strong id="inc-left-out">270°00′00.0″</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">较小夹角</span>
+              <strong id="inc-small-out">90°00′00.0″</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">较大夹角</span>
+              <strong id="inc-larger-out">270°00′00.0″</strong>
+            </div>
+          </div>
+
+          <div class="breakdown">
+            <span class="micro-label">计算 / CALC</span>
+            <code id="inc-formula">右角 = (αB − αA + 360°) mod 360° = 90°00′00.0″</code>
+          </div>
+
+          <div class="result-footnote">
+            <span id="inc-extra">测量右角：从后视方向顺时针转到前视方向</span>
+            <span>左角 + 右角 = 360°</span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="formula-strip">
+        <span class="formula-tag">NOTE</span>
+        <p><strong>左右角不要混：</strong>右角是顺时针夹角，左角是逆时针夹角；通常情况下夹角的“较小值”用于几何关系，测量记录则按规范记录左角或右角。</p>
+      </aside>
+    </section>
+
+    <!-- ================= 05 导线闭合差 ================= -->
+    <section class="view view-traverse" id="view-traverse" data-view="traverse" hidden>
+      <header class="page-head">
+        <div class="page-head-copy">
+          <p class="eyebrow"><span class="eyebrow-index">05</span> TRAVERSE <span class="eyebrow-slash">/</span> ANGULAR CLOSURE</p>
+          <h1>导线<span class="title-highlight">闭合差</span><span class="title-dot">。</span></h1>
+          <p class="page-desc">闭合多边形内角和检核：计算角度闭合差、容许值、平均改正数，并给出改正后的内角。</p>
+        </div>
+        <div class="head-stamp" aria-hidden="true">
+          <span class="stamp-number">05</span>
+          <span class="stamp-label">Σβ<br>√n</span>
+        </div>
+      </header>
+
+      <div class="tool-grid tool-grid-traverse">
+        <section class="card input-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">OBSERVATIONS / 观测角</p>
+              <h2>闭合多边形内角</h2>
+            </div>
+            <div class="head-actions">
+              <button class="text-btn" id="trav-sample" type="button">示例</button>
+              <button class="text-btn" id="trav-reset" type="button">清空</button>
+            </div>
+          </div>
+
+          <div class="trav-controls">
+            <div class="stepper">
+              <span class="field-label">角数 <small>n</small></span>
+              <div class="stepper-ui">
+                <button type="button" id="trav-minus" aria-label="减少一个角">−</button>
+                <output id="trav-count">5</output>
+                <button type="button" id="trav-plus" aria-label="增加一个角">＋</button>
+              </div>
+            </div>
+            <label class="select-field">
+              <span class="field-label">容许值等级</span>
+              <select id="trav-grade">
+                <option value="40" selected>图根 · ±40″√n</option>
+                <option value="10">一级 · ±10″√n</option>
+                <option value="16">二级 · ±16″√n</option>
+                <option value="24">三级 · ±24″√n</option>
+                <option value="custom">自定义系数</option>
+              </select>
+            </label>
+            <label class="custom-coef" id="trav-custom-wrap" hidden>
+              <span class="field-label">系数 t（秒）</span>
+              <input id="trav-custom" type="text" inputmode="decimal" value="40" autocomplete="off">
+            </label>
+          </div>
+
+          <div class="trav-list-head" aria-hidden="true">
+            <span>序号</span><span>观测内角</span><span>改正</span>
+          </div>
+          <div class="trav-angles" id="trav-angles"></div>
+
+          <div class="trav-summary-line">
+            <span>Σβ <strong id="trav-sum-inline">540°01′03.0″</strong></span>
+            <span>理论值 <strong id="trav-theory-inline">540°00′00.0″</strong></span>
+          </div>
+        </section>
+
+        <section class="card result-card result-orange" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <p class="card-kicker">CHECK / 检核结果</p>
+              <span class="result-type">角度闭合差 f<sub>β</sub></span>
+            </div>
+            <div class="result-actions">
+              <button class="mini-btn" type="button" data-copy-target="trav-closure-out">复制</button>
+              <button class="mini-btn mini-btn-dark js-save" type="button" data-tool="traverse">＋ 记录</button>
+            </div>
+          </div>
+
+          <div class="verdict-row">
+            <div>
+              <div class="result-main-value result-main-value-sm" id="trav-closure-out">+63.0″</div>
+              <p class="result-caption" id="trav-closure-dms">+0°01′03.0″ · 观测和偏大</p>
+            </div>
+            <span class="verdict-stamp is-pass" id="trav-verdict">合格</span>
+          </div>
+
+          <div class="stat-grid stat-grid-2">
+            <div class="stat-cell">
+              <span class="stat-label">容许闭合差</span>
+              <strong id="trav-tolerance-out">±89.4″</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">每角平均改正</span>
+              <strong id="trav-correction-out">−12.6″</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">角度个数 n</span>
+              <strong id="trav-n-out">5</strong>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-label">改正后内角和</span>
+              <strong id="trav-corrected-sum">540°00′00.0″</strong>
+            </div>
+          </div>
+
+          <div class="verdict-note" id="trav-verdict-note">闭合差在容许范围内，可按相反符号平均分配改正数。</div>
+
+          <div class="correction-block">
+            <div class="correction-head">
+              <span class="micro-label">改正后角度 / ADJUSTED</span>
+              <button class="copy-tiny" type="button" id="trav-copy-table">复制表格</button>
+            </div>
+            <div class="correction-table" id="trav-table"></div>
+          </div>
+
+          <div class="breakdown">
+            <span class="micro-label">公式 / FORMULA</span>
+            <code>f<sub>β</sub> = Σβ − (n − 2) × 180° ; v = −f<sub>β</sub> / n</code>
+          </div>
+        </section>
+      </div>
+
+      <aside class="formula-strip formula-strip-warn">
+        <span class="formula-tag">READ ME</span>
+        <p><strong>仅作角度闭合检核：</strong>这里按多边形内角和理论值计算，改正数按角度个数平均分配。实际测量规范、方位角闭合差与坐标闭合差应以项目技术设计为准；“合格”判定不替代完整平差。</p>
+      </aside>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-brand"><span class="footer-mark">∟</span> 角尺 GONLAB</div>
+      <p>测绘角度工作台 · 全部计算在浏览器本地完成，不上传任何数据。</p>
+      <span class="footer-version">V1.0 / 2026</span>
+    </div>
+  </footer>
+
+  <nav class="bottom-nav" aria-label="工具导航">
+    <a class="nav-item is-active" href="#convert" data-nav="convert" aria-current="page">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V5h14M5 19l8-8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 5a5 5 0 0 1 5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span>
+      <span class="nav-text">转换</span>
+      <span class="nav-num">01</span>
+    </a>
+    <a class="nav-item" href="#ops" data-nav="ops">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h6M8 5v6M5 17h6M13 8h6M13 17h6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span>
+      <span class="nav-text">运算</span>
+      <span class="nav-num">02</span>
+    </a>
+    <a class="nav-item" href="#azimuth" data-nav="azimuth">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 12l4.8-4.8M12 4v2M12 18v2M4 12h2M18 12h2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span>
+      <span class="nav-text">方位</span>
+      <span class="nav-num">03</span>
+    </a>
+    <a class="nav-item" href="#included" data-nav="included">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M4 19L15 5M4 19l8 0" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 19a9 9 0 0 0-1.5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+      <span class="nav-text">夹角</span>
+      <span class="nav-num">04</span>
+    </a>
+    <a class="nav-item" href="#traverse" data-nav="traverse">
+      <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 18V7l7-3 7 3v11l-7 3z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 4v16M5 7l7 3 7-3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span>
+      <span class="nav-text">导线</span>
+      <span class="nav-num">05</span>
+    </a>
+  </nav>
+
+  <dialog class="history-dialog" id="history-dialog" aria-labelledby="history-title">
+    <div class="dialog-head">
+      <div>
+        <p class="card-kicker">LOCAL LOG / 本地记录</p>
+        <h2 id="history-title">计算记录</h2>
+      </div>
+      <button class="dialog-close" id="history-close" type="button" aria-label="关闭记录">×</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+    <div class="dialog-foot">
+      <button class="btn btn-outline" id="history-clear" type="button">清空全部</button>
+      <p>记录只保存在当前浏览器中。</p>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/angle.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

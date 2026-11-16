@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>时间计算器 — Bauhaus</title>
+<style>
+  :root{
+    --black:#111111;
+    --red:#E30613;
+    --yellow:#FFD500;
+    --blue:#0057B8;
+    --paper:#F2EEE4;
+    --white:#FFFFFF;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  [hidden]{ display:none !important; }
+
+  body{
+    background:var(--paper);
+    color:var(--black);
+    font-family:"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .bau-top{
+    height:44px;
+    background:var(--black);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 16px;
+    overflow:hidden;
+  }
+  .bau-top span{ display:block; flex:0 0 auto; }
+  .bt-c{ width:44px; height:44px; border-radius:50%; background:var(--red); }
+  .bt-t{
+    width:0; height:0;
+    border-left:22px solid transparent;
+    border-right:22px solid transparent;
+    border-bottom:38px solid var(--yellow);
+  }
+  .bt-s{ width:32px; height:32px; background:var(--blue); }
+  .bt-c2{ width:16px; height:16px; border-radius:50%; background:var(--paper); }
+  .bt-s2{ width:24px; height:24px; background:var(--yellow); }
+
+  .page{ max-width:920px; margin:0 auto; padding:0 28px 60px; }
+
+  .masthead{ padding:34px 0 22px; border-bottom:4px solid var(--black); }
+  .kicker{
+    display:flex; align-items:center; gap:12px;
+    font-size:11px; font-weight:700; letter-spacing:.2em;
+    text-transform:uppercase; margin-bottom:22px;
+  }
+  .k-line{ flex:1; height:3px; background:var(--black); }
+  .title-row{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+  }
+  h1{
+    margin:0;
+    font-size:clamp(38px, 9vw, 80px);
+    font-weight:900;
+    letter-spacing:-.04em;
+    line-height:.9;
+  }
+  h1 .dot{
+    display:inline-block;
+    width:.16em; height:.16em;
+    border-radius:50%;
+    background:var(--red);
+    margin-left:.08em;
+  }
+  .shapes{ display:flex; align-items:flex-end; gap:8px; padding-bottom:8px; }
+  .sh-circle{ width:26px; height:26px; border-radius:50%; background:var(--red); }
+  .sh-tri{
+    width:0; height:0;
+    border-left:13px solid transparent;
+    border-right:13px solid transparent;
+    border-bottom:24px solid var(--yellow);
+  }
+  .sh-sq{ width:22px; height:22px; background:var(--blue); }
+  .lead{ margin:16px 0 0; font-size:15px; font-weight:500; max-width:36em; }
+
+  .mode-switch{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border:3px solid var(--black);
+    margin-top:22px;
+  }
+  .mode-btn{
+    border:0;
+    background:var(--white);
+    color:var(--black);
+    padding:16px 8px;
+    font-family:inherit;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    min-height:52px;
+    cursor:pointer;
+    transition:background .12s, color .12s;
+  }
+  .mode-btn + .mode-btn{ border-left:3px solid var(--black); }
+  .mode-btn.active{ background:var(--black); color:var(--white); }
+
+  .step{
+    display:grid;
+    grid-template-columns:52px 1fr;
+    gap:18px;
+    padding:24px 0;
+    border-bottom:2px solid var(--black);
+  }
+  .idx{
+    width:42px; height:42px;
+    border-radius:50%;
+    border:3px solid var(--black);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:900;
+    flex:0 0 auto;
+  }
+  .idx-red{ background:var(--red); color:var(--white); }
+  .idx-yellow{ background:var(--yellow); color:var(--black); }
+  .idx-blue{ background:var(--blue); color:var(--white); }
+
+  .lbl{
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  .row{ display:flex; gap:10px; }
+  .row input{ flex:1; min-width:0; }
+
+  input[type="datetime-local"],
+  input[type="number"]{
+    font-family:inherit;
+    font-size:16px;
+    color:var(--black);
+    background:var(--white);
+    border:3px solid var(--black);
+    border-radius:0;
+    padding:12px;
+    width:100%;
+    font-variant-numeric:tabular-nums;
+  }
+  input[type="datetime-local"]:focus,
+  input[type="number"]:focus{
+    outline:3px solid var(--red);
+    outline-offset:2px;
+  }
+
+  button{ font-family:inherit; cursor:pointer; border-radius:0; }
+
+  .btn-line{
+    border:3px solid var(--black);
+    background:var(--white);
+    color:var(--black);
+    padding:0 16px;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    white-space:nowrap;
+    min-height:48px;
+    transition:background .12s, color .12s;
+  }
+  .btn-line:hover{ background:var(--black); color:var(--white); }
+
+  .op-switch{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border:3px solid var(--black);
+    margin-bottom:12px;
+  }
+  .op-btn{
+    border:0;
+    background:var(--white);
+    color:var(--black);
+    padding:14px 8px;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:.06em;
+    min-height:48px;
+    transition:background .12s, color .12s;
+  }
+  .op-btn + .op-btn{ border-left:3px solid var(--black); }
+  .op-btn.active[data-op="1"]{ background:var(--yellow); color:var(--black); }
+  .op-btn.active[data-op="-1"]{ background:var(--blue); color:var(--white); }
+    .units{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:3px;
+    background:var(--black);
+    border:3px solid var(--black);
+  }
+  .unit{ background:var(--white); }
+  .unit input[type="number"]{
+    border:0;
+    background:transparent;
+    text-align:center;
+    font-size:24px;
+    font-weight:900;
+    padding:14px 2px 6px;
+  }
+  .unit input[type="number"]:focus{
+    outline:3px solid var(--red);
+    outline-offset:-3px;
+  }
+  .unit span{
+    display:block;
+    text-align:center;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding-bottom:10px;
+  }
+
+  .btn-solid{
+    width:100%;
+    border:3px solid var(--black);
+    background:var(--yellow);
+    color:var(--black);
+    padding:18px;
+    font-size:15px;
+    font-weight:900;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    box-shadow:8px 8px 0 var(--black);
+    transition:background .12s, color .12s, transform .1s, box-shadow .1s;
+  }
+  .btn-solid:hover{ background:var(--red); color:var(--white); }
+  .btn-solid:active{ transform:translate(4px,4px); box-shadow:4px 4px 0 var(--black); }
+
+  .err{
+    margin:14px 0 0;
+    font-size:13px;
+    font-weight:900;
+    color:var(--red);
+  }
+  .err:empty{ display:none; }
+
+  .result{
+    margin-top:32px;
+    background:var(--blue);
+    color:var(--white);
+    border:3px solid var(--black);
+    box-shadow:10px 10px 0 var(--yellow);
+    padding:24px 22px 28px;
+    position:relative;
+    overflow:hidden;
+  }
+  .result::before{
+    content:"";
+    position:absolute;
+    right:-45px; bottom:-45px;
+    width:130px; height:130px;
+    border-radius:50%;
+    background:var(--red);
+    z-index:0;
+  }
+  .result > *{ position:relative; z-index:1; }
+
+  .result-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    border-bottom:2px solid rgba(255,255,255,.35);
+    padding-bottom:12px;
+    margin-bottom:20px;
+  }
+  .tag{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--yellow);
+  }
+  .tag i{
+    display:block;
+    width:12px; height:12px;
+    border-radius:50%;
+    background:var(--yellow);
+    flex:0 0 auto;
+  }
+  .btn-ghost{
+    border:2px solid var(--white);
+    background:transparent;
+    color:var(--white);
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    padding:8px 12px;
+    min-height:38px;
+    transition:background .12s, color .12s;
+  }
+  .btn-ghost:hover{ background:var(--white); color:var(--black); }
+
+  .time{
+    font-size:clamp(22px, 6vw, 44px);
+    font-weight:900;
+    letter-spacing:-.01em;
+    line-height:1.1;
+    font-variant-numeric:tabular-nums;
+    word-break:break-word;
+  }
+  .meta{
+    margin-top:16px;
+    font-size:14px;
+    line-height:1.7;
+    color:rgba(255,255,255,.86);
+  }
+  .meta b{ color:var(--yellow); font-weight:900; }
+
+  .foot{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-top:40px;
+    padding-top:14px;
+    border-top:3px solid var(--black);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#444;
+  }
+
+  #jsError{
+    display:none;
+    background:var(--red);
+    color:var(--white);
+    border:3px solid var(--black);
+    padding:10px 14px;
+    margin:18px 0 0;
+    font-size:13px;
+    font-weight:900;
+  }
+
+  @media (max-width:640px){
+    .bau-top{ height:36px; gap:9px; padding:0 12px; }
+    .bt-c{ width:36px; height:36px; }
+    .bt-t{
+      border-left-width:18px;
+      border-right-width:18px;
+      border-bottom-width:32px;
+    }
+    .bt-s{ width:26px; height:26px; }
+    .bt-c2{ width:13px; height:13px; }
+    .bt-s2{ width:20px; height:20px; }
+
+    .page{ padding:0 16px 44px; }
+    .masthead{ padding:26px 0 18px; border-bottom-width:3px; }
+    .kicker{
+      font-size:9px;
+      letter-spacing:.12em;
+      gap:8px;
+      margin-bottom:18px;
+    }
+    .k-line{ height:2px; }
+    .shapes{ display:none; }
+    .lead{ font-size:13px; margin-top:12px; }
+
+    .mode-switch{ margin-top:18px; }
+    .mode-btn{
+      font-size:11px;
+      padding:14px 6px;
+      min-height:48px;
+      letter-spacing:.04em;
+    }
+
+    .step{
+      grid-template-columns:34px 1fr;
+      gap:12px;
+      padding:20px 0;
+    }
+    .idx{
+      width:32px; height:32px;
+      font-size:11px;
+      border-width:2px;
+    }
+    .lbl{
+      font-size:10px;
+      letter-spacing:.14em;
+      margin-bottom:10px;
+    }
+
+    .row{ gap:8px; }
+    .btn-line{
+      padding:0 12px;
+      font-size:11px;
+      min-height:46px;
+    }
+
+    .units{ grid-template-columns:repeat(2, 1fr); }
+    .unit input[type="number"]{
+      font-size:22px;
+      padding:12px 2px 4px;
+    }
+    .unit span{ font-size:9px; padding-bottom:8px; }
+
+    .op-btn{
+      font-size:13px;
+      padding:12px 6px;
+      min-height:46px;
+    }
+
+    .btn-solid{
+      padding:16px;
+      font-size:14px;
+      letter-spacing:.18em;
+      box-shadow:6px 6px 0 var(--black);
+    }
+    .btn-solid:active{
+      transform:translate(3px,3px);
+      box-shadow:3px 3px 0 var(--black);
+    }
+
+    .result{
+      margin-top:26px;
+      padding:20px 18px 24px;
+      box-shadow:7px 7px 0 var(--yellow);
+    }
+    .result-head{ margin-bottom:16px; }
+    .time{ font-size:clamp(20px, 6.5vw, 34px); }
+    .meta{ font-size:13px; }
+
+    .foot{ font-size:10px; margin-top:30px; }
+  }
+</style>
+</head>
+<body>
+  <div class="bau-top" aria-hidden="true">
+    <span class="bt-c"></span>
+    <span class="bt-t"></span>
+    <span class="bt-s"></span>
+    <span class="bt-c2"></span>
+    <span class="bt-s2"></span>
+  </div>
+
+  <main class="page">
+    <header class="masthead">
+      <div class="kicker">
+        <span>1919 — 1933</span>
+        <span class="k-line"></span>
+        <span>Form Follows Function</span>
+      </div>
+      <div class="title-row">
+        <h1>时间计算器<span class="dot"></span></h1>
+        <div class="shapes" aria-hidden="true">
+          <span class="sh-circle"></span>
+          <span class="sh-tri"></span>
+          <span class="sh-sq"></span>
+        </div>
+      </div>
+      <p class="lead">时刻 ± 时长 = 结果时刻　／　时刻 − 时刻 = 时间差</p>
+    </header>
+
+    <div id="jsError"></div>
+
+    <div class="mode-switch" role="tablist" aria-label="计算模式">
+      <button class="mode-btn active" data-mode="shift" type="button" role="tab" aria-selected="true">
+        时刻 ± 时长
+      </button>
+      <button class="mode-btn" data-mode="diff" type="button" role="tab" aria-selected="false">
+        时刻 − 时刻
+      </button>
+    </div>
+
+    <div id="panelShift">
+      <section class="step">
+        <div class="idx idx-red">01</div>
+        <div class="content">
+          <div class="lbl">起始时刻</div>
+          <div class="row">
+            <input type="datetime-local" id="base" step="1" aria-label="起始时刻" />
+            <button class="btn-line" id="nowBtn" type="button">现在</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="step">
+        <div class="idx idx-yellow">02</div>
+        <div class="content">
+          <div class="lbl">运算与时长</div>
+          <div class="op-switch">
+            <button class="op-btn active" data-op="1" type="button">＋ 加上</button>
+            <button class="op-btn" data-op="-1" type="button">− 减去</button>
+          </div>
+          <div class="units">
+            <div class="unit">
+              <input type="number" id="days" value="0" step="1" inputmode="numeric" aria-label="天" />
+              <span>天 Days</span>
+            </div>
+            <div class="unit">
+              <input type="number" id="hours" value="0" step="1" inputmode="numeric" aria-label="小时" />
+              <span>小时 Hours</span>
+            </div>
+            <div class="unit">
+              <input type="number" id="mins" value="0" step="1" inputmode="numeric" aria-label="分钟" />
+              <span>分钟 Min</span>
+            </div>
+            <div class="unit">
+              <input type="number" id="secs" value="0" step="1" inputmode="numeric" aria-label="秒" />
+              <span>秒 Sec</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="step">
+        <div class="idx idx-blue">03</div>
+        <div class="content">
+          <button class="btn-solid" id="calcBtn" type="button">计算</button>
+          <p class="err" id="err"></p>
+        </div>
+      </section>
+    </div>
+      <div id="panelDiff" hidden>
+    <section class="step">
+      <div class="idx idx-red">01</div>
+      <div class="content">
+        <div class="lbl">时刻一（被减数）</div>
+        <div class="row">
+          <input type="datetime-local" id="t1" step="1" aria-label="时刻一" />
+          <button class="btn-line" id="nowBtn1" type="button">现在</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="idx idx-yellow">02</div>
+      <div class="content">
+        <div class="lbl">时刻二（减数）</div>
+        <div class="row">
+          <input type="datetime-local" id="t2" step="1" aria-label="时刻二" />
+          <button class="btn-line" id="nowBtn2" type="button">现在</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="idx idx-blue">03</div>
+      <div class="content">
+        <button class="btn-solid" id="calcBtn2" type="button">计算</button>
+        <p class="err" id="err2"></p>
+      </div>
+    </section>
+  </div>
+
+  <section class="result">
+    <div class="result-head">
+      <span class="tag"><i></i><span id="resTag">结果时刻</span></span>
+      <button class="btn-ghost" id="copyBtn" type="button">复制</button>
+    </div>
+    <div class="time" id="resTime">—</div>
+    <div class="meta" id="resMeta">填写上面的内容后点击「计算」</div>
+  </section>
+
+  <footer class="foot">
+    <span>支持 时刻 ± 时长 ／ 时刻 − 时刻</span>
+    <span>输入负数相当于反向运算</span>
+  </footer>
+</main>
+<script>
+(function () {
+  'use strict';
+
+  window.onerror = function (msg, url, line) {
+    var el = document.getElementById('jsError');
+    if (el) {
+      el.style.display = 'block';
+      el.textContent = 'JS 错误：' + msg + '（第 ' + line + ' 行）';
+    }
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  function toInputValue(d) {
+    return d.getFullYear() + '-' +
+           pad(d.getMonth() + 1) + '-' +
+           pad(d.getDate()) + 'T' +
+           pad(d.getHours()) + ':' +
+           pad(d.getMinutes()) + ':' +
+           pad(d.getSeconds());
+  }
+
+  function fmtDateTime(d) {
+    return d.getFullYear() + '-' +
+           pad(d.getMonth() + 1) + '-' +
+           pad(d.getDate()) + ' ' +
+           pad(d.getHours()) + ':' +
+           pad(d.getMinutes()) + ':' +
+           pad(d.getSeconds());
+  }
+
+  function init() {
+    var baseEl = $('base');
+    var t1El = $('t1'), t2El = $('t2');
+    var inDays = $('days'), inHours = $('hours'), inMins = $('mins'), inSecs = $('secs');
+    var errEl = $('err'), errEl2 = $('err2');
+    var resTag = $('resTag'), resTime = $('resTime'), resMeta = $('resMeta');
+    var copyBtn = $('copyBtn');
+    var panelShift = $('panelShift'), panelDiff = $('panelDiff');
+
+    if (!baseEl || !resTime || !resMeta || !panelShift || !panelDiff) {
+      var el = $('jsError');
+      if (el) {
+        el.style.display = 'block';
+        el.textContent = '错误：页面元素未找到，请检查 HTML 结构。';
+      }
+      return;
+    }
+
+    var WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    var currentOp = 1;
+    var currentMode = 'shift';
+
+    function num(el) {
+      var v = parseFloat(el.value);
+      return isFinite(v) ? v : 0;
+    }
+
+    function fmtDuration(totalSeconds) {
+      var neg = totalSeconds < 0;
+      var s = Math.round(Math.abs(totalSeconds));
+      var d = Math.floor(s / 86400); s %= 86400;
+      var h = Math.floor(s / 3600);  s %= 3600;
+      var m = Math.floor(s / 60);    s %= 60;
+      var parts = [];
+      if (d) parts.push(d + ' 天');
+      if (h) parts.push(h + ' 小时');
+      if (m) parts.push(m + ' 分');
+      if (s) parts.push(s + ' 秒');
+      if (!parts.length) parts.push('0 秒');
+      return (neg ? '−' : '') + parts.join(' ');
+    }
+
+    function clearResult() {
+      resTime.textContent = '—';
+      resMeta.textContent = '请修正上面的输入后重新计算';
+    }
+
+    function calcShift() {
+      errEl.textContent = '';
+
+      if (!baseEl.value) {
+        errEl.textContent = '请先选择起始时刻';
+        return false;
+      }
+      var base = new Date(baseEl.value);
+      if (isNaN(base.getTime())) {
+        errEl.textContent = '起始时刻格式不正确';
+        return false;
+      }
+
+      var totalSeconds =
+        num(inDays) * 86400 + num(inHours) * 3600 + num(inMins) * 60 + num(inSecs);
+
+      var res = new Date(base.getTime() + currentOp * totalSeconds * 1000);
+      if (isNaN(res.getTime())) {
+        errEl.textContent = '结果超出可表示的时间范围';
+        return false;
+      }
+
+      resTime.textContent = fmtDateTime(res);
+
+      if (totalSeconds === 0) {
+        resMeta.innerHTML = WEEK[res.getDay()] + '　·　未' +
+          (currentOp === 1 ? '增加' : '减少') + '任何时间，结果等于起始时刻';
+      } else {
+        var verb = currentOp === 1 ? '加上' : '减去';
+        resMeta.innerHTML =
+          WEEK[res.getDay()] + '<br>' +
+          '起始时刻 ' + WEEK[base.getDay()] + ' ' + fmtDateTime(base) +
+          ' ' + verb + ' <b>' + fmtDuration(totalSeconds) + '</b>';
+      }
+      return true;
+    }
+
+    function calcDiff() {
+      errEl2.textContent = '';
+
+      if (!t1El.value || !t2El.value) {
+        errEl2.textContent = '请选择两个时刻';
+        return false;
+      }
+      var t1 = new Date(t1El.value);
+      var t2 = new Date(t2El.value);
+      if (isNaN(t1.getTime()) || isNaN(t2.getTime())) {
+        errEl2.textContent = '时刻格式不正确';
+        return false;
+      }
+
+      var diffSec = (t1.getTime() - t2.getTime()) / 1000;
+      resTime.textContent = fmtDuration(diffSec);
+
+      if (diffSec === 0) {
+        resMeta.innerHTML = '两个时刻相同，时间差为 <b>0 秒</b>';
+      } else {
+        var relation = diffSec > 0 ? '时刻一较晚' : '时刻二较晚';
+        resMeta.innerHTML =
+          '时刻一 ' + WEEK[t1.getDay()] + ' ' + fmtDateTime(t1) + '<br>' +
+          '时刻二 ' + WEEK[t2.getDay()] + ' ' + fmtDateTime(t2) + '<br>' +
+          '相差 <b>' + fmtDuration(diffSec) + '</b>（' + relation + '）';
+      }
+      return true;
+    }
+
+    function calc() {
+      var ok;
+      if (currentMode === 'shift') {
+        ok = calcShift();
+      } else {
+        ok = calcDiff();
+      }
+      if (!ok) clearResult();
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+
+      document.querySelectorAll('.mode-btn').forEach(function (b) {
+        var on = b.getAttribute('data-mode') === mode;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+
+      panelShift.hidden = (mode !== 'shift');
+      panelDiff.hidden = (mode !== 'diff');
+      resTag.textContent = mode === 'shift' ? '结果时刻' : '时间差';
+      errEl.textContent = '';
+      errEl2.textContent = '';
+
+      calc();
+    }
+
+    function setOp(op) {
+      currentOp = op;
+      document.querySelectorAll('.op-btn').forEach(function (b) {
+        b.classList.toggle('active', parseInt(b.getAttribute('data-op'), 10) === op);
+      });
+      calc();
+    }
+
+    function fillNow() {
+      var v = toInputValue(new Date());
+      baseEl.value = v;
+      t1El.value = v;
+      t2El.value = v;
+    }
+
+    $('nowBtn').addEventListener('click', function () {
+      baseEl.value = toInputValue(new Date());
+      calc();
+    });
+    $('nowBtn1').addEventListener('click', function () {
+      t1El.value = toInputValue(new Date());
+      calc();
+    });
+    $('nowBtn2').addEventListener('click', function () {
+      t2El.value = toInputValue(new Date());
+      calc();
+    });
+
+    $('calcBtn').addEventListener('click', calc);
+    $('calcBtn2').addEventListener('click', calc);
+
+    document.querySelectorAll('.mode-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setMode(b.getAttribute('data-mode'));
+      });
+    });
+
+    document.querySelectorAll('.op-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setOp(parseInt(b.getAttribute('data-op'), 10));
+      });
+    });
+
+    copyBtn.addEventListener('click', function () {
+      var txt = resTime.textContent.trim();
+      if (!txt || txt === '—') return;
+
+      var done = function (ok) {
+        copyBtn.textContent = ok ? '已复制' : '复制失败';
+        setTimeout(function () { copyBtn.textContent = '复制'; }, 1200);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () {
+          done(true);
+        }).catch(function () {
+          done(false);
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+        document.body.removeChild(ta);
+        done(ok);
+      }
+    });
+
+    [baseEl, t1El, t2El, inDays, inHours, inMins, inSecs].forEach(function (el) {
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') calc();
+      });
+    });
+
+    fillNow();
+    setMode('shift');
+    setOp(1);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
